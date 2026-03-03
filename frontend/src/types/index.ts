@@ -77,3 +77,27 @@ export interface Grade {
   score: number;
   grade_value: number;
 }
+
+export interface AuthTokens {
+  access: string;
+  refresh: string;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  password_confirm: string;
+  full_name: string;
+  role: 'student' | 'teacher';
+  grade_class?: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  tokens: AuthTokens;
+}
