@@ -5,13 +5,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.permissions import IsStudent
+from accounts.permissions import IsStudent, IsTeacher
 from grades.models import Grade
-from .models import Quiz, Question, QuizAttempt, StudentAnswer
+from .models import Quiz, Question, Choice, QuizAttempt, StudentAnswer
 from .serializers import (
     QuizSerializer,
     QuizAttemptListSerializer,
     QuizAttemptDetailSerializer,
+    TeacherQuizSerializer,
+    TeacherQuestionSerializer,
+    TeacherChoiceSerializer,
 )
 
 
@@ -127,3 +130,21 @@ class AttemptViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'retrieve':
             return QuizAttemptDetailSerializer
         return QuizAttemptListSerializer
+
+
+class TeacherQuizViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsTeacher]
+    queryset = Quiz.objects.all()
+    serializer_class = TeacherQuizSerializer
+
+
+class TeacherQuestionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsTeacher]
+    queryset = Question.objects.all()
+    serializer_class = TeacherQuestionSerializer
+
+
+class TeacherChoiceViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsTeacher]
+    queryset = Choice.objects.all()
+    serializer_class = TeacherChoiceSerializer

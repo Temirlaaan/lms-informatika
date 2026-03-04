@@ -4,12 +4,15 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.permissions import IsStudent
-from .models import Section, Topic, TopicProgress
+from accounts.permissions import IsStudent, IsTeacher
+from .models import Section, Topic, Lesson, TopicProgress
 from .serializers import (
     SectionListSerializer,
     SectionDetailSerializer,
     TopicDetailSerializer,
+    TeacherSectionSerializer,
+    TeacherTopicSerializer,
+    TeacherLessonSerializer,
 )
 
 
@@ -75,3 +78,23 @@ class ProgressView(generics.GenericAPIView):
                 'percentage': round((completed / total) * 100) if total > 0 else 0,
             })
         return Response(data)
+
+
+class TeacherSectionViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsTeacher]
+    queryset = Section.objects.all()
+    serializer_class = TeacherSectionSerializer
+
+
+class TeacherTopicViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsTeacher]
+    queryset = Topic.objects.all()
+    serializer_class = TeacherTopicSerializer
+
+
+class TeacherLessonViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsTeacher]
+    serializer_class = TeacherLessonSerializer
+
+    def get_queryset(self):
+        return Lesson.objects.all()

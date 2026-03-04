@@ -81,3 +81,25 @@ class QuizAttemptDetailSerializer(serializers.ModelSerializer):
             'total_points', 'earned_points',
             'started_at', 'finished_at', 'is_completed', 'answers',
         ]
+
+
+class TeacherChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Choice
+        fields = ['id', 'question', 'text', 'is_correct', 'order']
+
+
+class TeacherQuestionSerializer(serializers.ModelSerializer):
+    choices = TeacherChoiceSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Question
+        fields = ['id', 'quiz', 'text', 'question_type', 'image', 'points', 'order', 'choices']
+
+
+class TeacherQuizSerializer(serializers.ModelSerializer):
+    questions = TeacherQuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Quiz
+        fields = ['id', 'topic', 'title', 'description', 'time_limit_minutes', 'passing_score', 'max_attempts', 'is_published', 'questions']

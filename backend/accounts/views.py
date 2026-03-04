@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from .models import User
+from .permissions import IsTeacher
 from .serializers import (
     CustomTokenObtainPairSerializer,
     ProfileSerializer,
@@ -52,3 +54,9 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class StudentListView(generics.ListAPIView):
+    permission_classes = [IsTeacher]
+    serializer_class = UserSerializer
+    queryset = User.objects.filter(role='student').order_by('full_name')

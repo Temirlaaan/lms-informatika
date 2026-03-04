@@ -91,3 +91,21 @@ class SectionDetailSerializer(serializers.ModelSerializer):
         else:
             topics = obj.topics.filter(is_published=True)
         return TopicListSerializer(topics, many=True, context=self.context).data
+
+
+class TeacherSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ['id', 'title', 'description', 'order', 'icon', 'is_published']
+
+
+class TeacherTopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Topic
+        fields = ['id', 'section', 'title', 'order', 'is_published']
+
+
+class TeacherLessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = ['id', 'topic', 'content', 'video_url']
