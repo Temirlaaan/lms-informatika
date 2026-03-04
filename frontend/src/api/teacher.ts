@@ -1,5 +1,5 @@
 import api from './axios';
-import { Section, Topic, Quiz, Question, Choice } from '../types';
+import type { Section, Topic, Quiz, Question, Choice } from '../types';
 
 // Sections CRUD
 export const getTeacherSections = () => api.get('/courses/teacher/sections/');
