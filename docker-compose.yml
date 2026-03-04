@@ -2,13 +2,12 @@ services:
   backend:
     build: ./backend
     container_name: lms-backend
+    network_mode: host
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
     volumes:
       - media_data:/app/media
       - db_data:/app
-    ports:
-      - "8000:8000"
     command: >
       sh -c "python manage.py migrate &&
              python manage.py seed_data &&
@@ -17,8 +16,7 @@ services:
   frontend:
     build: ./frontend
     container_name: lms-frontend
-    ports:
-      - "3000:80"
+    network_mode: host
     depends_on:
       - backend
 
