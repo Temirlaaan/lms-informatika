@@ -20,6 +20,7 @@ import TeacherDashboard from './pages/teacher/DashboardPage';
 import ContentManagerPage from './pages/teacher/ContentManagerPage';
 import QuizManagerPage from './pages/teacher/QuizManagerPage';
 import GradebookPage from './pages/teacher/GradebookPage';
+import StudentsListPage from './pages/teacher/StudentsListPage';
 import StudentDetailPage from './pages/teacher/StudentDetailPage';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
               <Route path="/teacher/content" element={<ContentManagerPage />} />
               <Route path="/teacher/quizzes" element={<QuizManagerPage />} />
               <Route path="/teacher/gradebook" element={<GradebookPage />} />
+              <Route path="/teacher/students" element={<StudentsListPage />} />
               <Route path="/teacher/students/:id" element={<StudentDetailPage />} />
             </Route>
           </Route>

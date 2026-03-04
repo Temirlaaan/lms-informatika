@@ -22,12 +22,13 @@ export default function SectionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [section, setSection] = useState<SectionDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (id) {
       getSection(Number(id))
         .then((r) => setSection(r.data))
-        .catch(() => {})
+        .catch(() => setError('Бөлімді жүктеу кезінде қате орын алды'))
         .finally(() => setLoading(false));
     }
   }, [id]);
@@ -35,6 +36,7 @@ export default function SectionDetailPage() {
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
+  if (error) return <p className="text-red-600">{error}</p>;
 
   if (!section) {
     return <p className="text-gray-500">Бөлім табылмады</p>;

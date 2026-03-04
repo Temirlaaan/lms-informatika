@@ -28,12 +28,13 @@ export default function TopicDetailPage() {
   const [topic, setTopic] = useState<TopicDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (id) {
       getTopic(Number(id))
         .then((r) => setTopic(r.data))
-        .catch(() => {})
+        .catch(() => setError('Тақырыпты жүктеу кезінде қате орын алды'))
         .finally(() => setLoading(false));
     }
   }, [id]);
@@ -59,6 +60,7 @@ export default function TopicDetailPage() {
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
+  if (error) return <p className="text-red-600">{error}</p>;
 
   if (!topic) {
     return <p className="text-gray-500">Тақырып табылмады</p>;

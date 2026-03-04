@@ -25,14 +25,18 @@ export default function StudentDashboard() {
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [grades, setGrades] = useState<GradeItem[]>([]);
 
+  const [error, setError] = useState('');
+
   useEffect(() => {
-    getProgress().then((r) => setProgress(r.data)).catch(() => {});
+    getProgress().then((r) => setProgress(r.data)).catch(() => setError('Деректерді жүктеу кезінде қате орын алды'));
     getMyGrades().then((r) => setGrades(r.data)).catch(() => {});
   }, []);
 
   const totalTopics = progress.reduce((s, p) => s + p.total_topics, 0);
   const completedTopics = progress.reduce((s, p) => s + p.completed_topics, 0);
   const overallPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div className="space-y-8">

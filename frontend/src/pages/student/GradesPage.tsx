@@ -12,11 +12,12 @@ interface GradeItem {
 export default function GradesPage() {
   const [grades, setGrades] = useState<GradeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     getMyGrades()
       .then((r) => setGrades(r.data))
-      .catch(() => {})
+      .catch(() => setError('Бағаларды жүктеу кезінде қате орын алды'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -30,6 +31,7 @@ export default function GradesPage() {
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div>

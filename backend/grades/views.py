@@ -31,30 +31,24 @@ class TeacherGradebookView(generics.GenericAPIView):
         students = User.objects.filter(role='student').order_by('full_name')
         sections = Section.objects.filter(is_published=True).order_by('order')
 
-        data = []
+        section_names = [s.title for s in sections]
+        student_list = []
         for student in students:
             grades = Grade.objects.filter(student=student).select_related('section')
             grade_map = {
-                g.section_id: {'score': g.score, 'grade_value': g.grade_value}
+                g.section.title: {'score': g.score, 'grade_value': g.grade_value}
                 for g in grades
             }
-            student_data = {
-                'id': student.id,
-                'full_name': student.full_name or student.username,
-                'grade_class': student.grade_class,
-                'grades': [],
-            }
-            for section in sections:
-                g = grade_map.get(section.id, {'score': None, 'grade_value': None})
-                student_data['grades'].append({
-                    'section_id': section.id,
-                    'section_title': section.title,
-                    'score': g['score'],
-                    'grade_value': g['grade_value'],
-                })
-            data.append(student_data)
+            student_list.append({
+                'student_id': student.id,
+                'student_name': student.full_name or student.username,
+                'grades': grade_map,
+            })
 
-        return Response(data)
+        return Response({
+            'sections': section_names,
+            'students': student_list,
+        })
 
 
 class StudentDetailGradesView(generics.GenericAPIView):
@@ -68,14 +62,19 @@ class StudentDetailGradesView(generics.GenericAPIView):
             return Response({'error': 'Оқушы табылмады'}, status=404)
 
         grades = Grade.objects.filter(student=student).select_related('section')
-        serializer = GradeSerializer(grades, many=True)
+        grades_data = [
+            {
+                'section_name': g.section.title,
+                'grade_value': g.grade_value,
+                'score': g.score,
+            }
+            for g in grades
+        ]
         return Response({
-            'student': {
-                'id': student.id,
-                'full_name': student.full_name or student.username,
-                'grade_class': student.grade_class,
-            },
-            'grades': serializer.data,
+            'student_id': student.id,
+            'student_name': student.full_name or student.username,
+            'grade_class': student.grade_class,
+            'grades': grades_data,
         })
 
 
@@ -85,19 +84,24 @@ class StatisticsView(generics.GenericAPIView):
     permission_classes = [IsTeacher]
 
     def get(self, request):
+        from quizzes.models import Quiz
+
         sections = Section.objects.filter(is_published=True).order_by('order')
         total_students = User.objects.filter(role='student').count()
+        total_sections = sections.count()
+        total_quizzes = Quiz.objects.count()
 
-        data = []
+        section_stats = []
+        all_scores = []
         for section in sections:
             grades = Grade.objects.filter(section=section)
             avg_score = grades.aggregate(avg=Avg('score'))['avg'] or 0
             students_with_grade = grades.values('student').distinct().count()
+            all_scores.extend(grades.values_list('score', flat=True))
 
-            data.append({
-                'section_id': section.id,
-                'section_title': section.title,
-                'average_score': round(avg_score, 1),
+            section_stats.append({
+                'section_name': section.title,
+                'avg_score': round(avg_score, 1),
                 'students_completed': students_with_grade,
                 'total_students': total_students,
                 'completion_rate': round(
@@ -105,4 +109,12 @@ class StatisticsView(generics.GenericAPIView):
                 ),
             })
 
-        return Response(data)
+        average_score = round(sum(all_scores) / len(all_scores), 1) if all_scores else 0
+
+        return Response({
+            'total_students': total_students,
+            'total_sections': total_sections,
+            'total_quizzes': total_quizzes,
+            'average_score': average_score,
+            'section_stats': section_stats,
+        })

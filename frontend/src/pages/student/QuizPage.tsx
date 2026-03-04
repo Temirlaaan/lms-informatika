@@ -33,7 +33,7 @@ export default function QuizPage() {
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [attemptId, setAttemptId] = useState<number | null>(null);
   const [answers, setAnswers] = useState<Record<number, number[]>>({});
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(-1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -63,27 +63,29 @@ export default function QuizPage() {
   }, [quiz, attemptId, answers, navigate, topicId]);
 
   useEffect(() => {
-    if (timeLeft <= 0 && attemptId && !submittedRef.current) {
+    if (timeLeft === 0 && attemptId && !submittedRef.current) {
       handleSubmit();
     }
   }, [timeLeft, attemptId, handleSubmit]);
 
   useEffect(() => {
     if (!topicId) return;
+    let quizData: QuizData;
     getQuizByTopic(Number(topicId))
       .then((r) => {
-        setQuiz(r.data);
-        if (r.data.attempts_used >= r.data.max_attempts) {
+        quizData = r.data;
+        setQuiz(quizData);
+        if (quizData.attempts_used !== undefined && quizData.attempts_used >= quizData.max_attempts) {
           setError('Әрекет лимитіне жеттіңіз');
           setLoading(false);
           return;
         }
-        return startQuiz(r.data.id);
+        return startQuiz(quizData.id);
       })
       .then((r) => {
         if (r) {
           setAttemptId(r.data.attempt_id);
-          setTimeLeft((quiz?.time_limit_minutes || 15) * 60);
+          setTimeLeft(quizData.time_limit_minutes * 60);
         }
       })
       .catch(() => setError('Тестті жүктеу мүмкін болмады'))
@@ -92,21 +94,21 @@ export default function QuizPage() {
   }, [topicId]);
 
   useEffect(() => {
-    if (quiz && attemptId) {
-      setTimeLeft(quiz.time_limit_minutes * 60);
-    }
-  }, [quiz, attemptId]);
-
-  useEffect(() => {
     if (timeLeft > 0 && attemptId) {
       timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [attemptId, timeLeft > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [attemptId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectChoice = (questionId: number, choiceId: number, type: string) => {
     setAnswers((prev) => {

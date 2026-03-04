@@ -15,17 +15,19 @@ interface SectionItem {
 export default function SectionsPage() {
   const [sections, setSections] = useState<SectionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     getSections()
       .then((r) => setSections(r.data))
-      .catch(() => {})
+      .catch(() => setError('Бөлімдерді жүктеу кезінде қате орын алды'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div>

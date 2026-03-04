@@ -99,5 +99,6 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   user: User;
-  tokens: AuthTokens;
+  access: string;
+  refresh: string;
 }

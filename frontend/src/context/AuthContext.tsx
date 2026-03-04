@@ -40,18 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (data: LoginRequest) => {
     const response = await loginUser(data);
-    const { tokens, user: userData } = response.data;
-    localStorage.setItem('access_token', tokens.access);
-    localStorage.setItem('refresh_token', tokens.refresh);
+    const { access, refresh, user: userData } = response.data;
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
     setUser(userData);
     navigate(userData.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard');
   };
 
   const register = async (data: RegisterRequest) => {
     const response = await registerUser(data);
-    const { tokens, user: userData } = response.data;
-    localStorage.setItem('access_token', tokens.access);
-    localStorage.setItem('refresh_token', tokens.refresh);
+    const { access, refresh, user: userData } = response.data;
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
     setUser(userData);
     navigate(userData.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard');
   };
