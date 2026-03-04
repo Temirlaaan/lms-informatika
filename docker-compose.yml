@@ -5,9 +5,10 @@ services:
     network_mode: host
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
+      - DB_DIR=/app/data
     volumes:
       - media_data:/app/media
-      - db_data:/app/db.sqlite3
+      - db_data:/app/data
     command: >
       sh -c "python manage.py migrate &&
              python manage.py seed_data &&
