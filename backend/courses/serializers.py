@@ -33,16 +33,20 @@ class TopicListSerializer(serializers.ModelSerializer):
         return False
 
     def get_has_quiz(self, obj):
-        return hasattr(obj, 'quiz')
+        try:
+            return obj.quiz.is_published
+        except Topic.quiz.RelatedObjectDoesNotExist:
+            return False
 
 
 class TopicDetailSerializer(serializers.ModelSerializer):
     lesson = LessonSerializer(read_only=True)
     is_completed = serializers.SerializerMethodField()
+    has_quiz = serializers.SerializerMethodField()
 
     class Meta:
         model = Topic
-        fields = ['id', 'title', 'order', 'section', 'lesson', 'is_completed']
+        fields = ['id', 'title', 'order', 'section', 'lesson', 'is_completed', 'has_quiz']
 
     def get_is_completed(self, obj):
         request = self.context.get('request')
@@ -51,6 +55,12 @@ class TopicDetailSerializer(serializers.ModelSerializer):
                 student=request.user, topic=obj, is_completed=True
             ).exists()
         return False
+
+    def get_has_quiz(self, obj):
+        try:
+            return obj.quiz.is_published
+        except Topic.quiz.RelatedObjectDoesNotExist:
+            return False
 
 
 class SectionListSerializer(serializers.ModelSerializer):
@@ -106,6 +116,14 @@ class TeacherTopicSerializer(serializers.ModelSerializer):
 
 
 class TeacherLessonSerializer(serializers.ModelSerializer):
+    video_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+
     class Meta:
         model = Lesson
         fields = ['id', 'topic', 'content', 'video_url']
+
+    def validate_video_url(self, value):
+        """Convert empty strings to None so Django's URLField doesn't error."""
+        if not value or not value.strip():
+            return None
+        return value

@@ -17,6 +17,7 @@ class Grade(models.Model):
 
     class Meta:
         ordering = ['-score']
+        unique_together = ('student', 'section')
 
     def __str__(self):
         return f"{self.student} - {self.section}: {self.grade_value}"

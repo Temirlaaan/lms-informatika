@@ -96,7 +96,7 @@ export default function GradebookPage() {
                         {entry ? (
                           <div className="flex flex-col items-center gap-0.5">
                             <span
-                              className={`inline-block w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${gradeColor(entry.grade_value)}`}
+                              className={`w-8 h-8 rounded-full inline-flex items-center justify-center text-sm font-bold ${gradeColor(entry.grade_value)}`}
                             >
                               {entry.grade_value}
                             </span>

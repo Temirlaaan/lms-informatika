@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import type { Section, Topic, Lesson } from '../../types';
 import {
   getTeacherSections,
@@ -14,6 +16,32 @@ import {
   updateLesson,
   deleteLesson,
 } from '../../api/teacher';
+
+/**
+ * Convert any YouTube URL to embed format.
+ * Supports: watch?v=, youtu.be/, /embed/, /shorts/
+ * Returns null if not a valid YouTube URL.
+ */
+function toYouTubeEmbedUrl(url: string): string | null {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+  );
+  if (!match) return null;
+  return `https://www.youtube.com/embed/${match[1]}`;
+}
+
+const quillModules = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['blockquote', 'code-block'],
+    ['link', 'image'],
+    ['clean'],
+  ],
+};
 
 /* ─── Section Form ─── */
 function SectionForm({
@@ -178,10 +206,19 @@ function LessonEditor({
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Convert YouTube URL to embed format, send null if empty
+      const trimmedUrl = videoUrl.trim();
+      const processedUrl = trimmedUrl ? (toYouTubeEmbedUrl(trimmedUrl) || trimmedUrl) : null;
+
+      const payload: { content: string; video_url?: string | null; topic?: number } = {
+        content,
+        video_url: processedUrl,
+      };
+
       if (lesson) {
-        await updateLesson(lesson.id, { content, video_url: videoUrl || undefined });
+        await updateLesson(lesson.id, payload);
       } else {
-        await createLesson({ topic: topicId, content, video_url: videoUrl || undefined });
+        await createLesson({ topic: topicId, content, video_url: processedUrl ?? undefined });
       }
       onSaved();
     } catch {
@@ -202,25 +239,72 @@ function LessonEditor({
     }
   };
 
+  const handleImageUpload = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    // TODO: Implement actual image upload via Axios
+    alert(`${files.length} сурет таңдалды. Жүктеу функциясы жақында қосылады.`);
+  };
+
   return (
-    <div className="bg-white border rounded p-3 space-y-2">
-      <h4 className="text-sm font-semibold text-gray-700">Сабақ мазмұны</h4>
-      <textarea
-        className="w-full border rounded px-3 py-2 text-sm"
-        rows={6}
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Сабақ мазмұнын жазыңыз..."
-      />
+    <div className="bg-white border rounded p-3 space-y-3">
+      {/* WYSIWYG Editor */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Видео сілтемесі (міндетті емес)</label>
+        <h4 className="text-sm font-semibold text-gray-700 mb-1">Сабақ мазмұны</h4>
+        <ReactQuill
+          theme="snow"
+          value={content}
+          onChange={setContent}
+          modules={quillModules}
+          placeholder="Сабақ мазмұнын жазыңыз..."
+          className="bg-white [&_.ql-editor]:min-h-[150px]"
+        />
+      </div>
+
+      {/* Video URL */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Видео сілтемесі (міндетті емес)
+        </label>
         <input
           className="w-full border rounded px-3 py-2 text-sm"
           value={videoUrl}
           onChange={(e) => setVideoUrl(e.target.value)}
-          placeholder="https://..."
+          placeholder="https://www.youtube.com/watch?v=... немесе https://youtu.be/..."
         />
+        {videoUrl.trim() && toYouTubeEmbedUrl(videoUrl) && (
+          <p className="text-xs text-green-600 mt-1">
+            YouTube сілтемесі анықталды — автоматты түрде embed форматына ауыстырылады
+          </p>
+        )}
+        {videoUrl.trim() && !toYouTubeEmbedUrl(videoUrl) && (
+          <p className="text-xs text-amber-600 mt-1">
+            YouTube сілтемесі танылмады — URL сол қалпында сақталады
+          </p>
+        )}
       </div>
+
+      {/* Image Upload Scaffold */}
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+        <h4 className="text-sm font-semibold text-gray-700 mb-2">Сабақ суреттері</h4>
+        <p className="text-xs text-gray-500 mb-3">
+          Сабаққа қатысты суреттерді жүктеңіз (PNG, JPG, WEBP)
+        </p>
+        <label className="inline-flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Суреттерді таңдау
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleImageUpload(e.target.files)}
+          />
+        </label>
+      </div>
+
+      {/* Actions */}
       <div className="flex gap-2">
         <button
           onClick={handleSave}

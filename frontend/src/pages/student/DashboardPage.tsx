@@ -24,17 +24,25 @@ export default function StudentDashboard() {
   const { user } = useAuth();
   const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [grades, setGrades] = useState<GradeItem[]>([]);
-
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getProgress().then((r) => setProgress(r.data)).catch(() => setError('Деректерді жүктеу кезінде қате орын алды'));
-    getMyGrades().then((r) => setGrades(r.data)).catch(() => {});
+    Promise.all([
+      getProgress().then((r) => setProgress(r.data)),
+      getMyGrades().then((r) => setGrades(r.data)).catch(() => {}),
+    ])
+      .catch(() => setError('Деректерді жүктеу кезінде қате орын алды'))
+      .finally(() => setLoading(false));
   }, []);
 
   const totalTopics = progress.reduce((s, p) => s + p.total_topics, 0);
   const completedTopics = progress.reduce((s, p) => s + p.completed_topics, 0);
   const overallPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+
+  if (loading) {
+    return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
 
   if (error) return <p className="text-red-600">{error}</p>;
 
@@ -51,7 +59,13 @@ export default function StudentDashboard() {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Жалпы прогресс</h2>
         <div className="flex items-center gap-4">
-          <div className="flex-1 bg-gray-200 rounded-full h-4">
+          <div
+            className="flex-1 bg-gray-200 rounded-full h-4"
+            role="progressbar"
+            aria-valuenow={overallPercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
               className="bg-accent h-4 rounded-full transition-all"
               style={{ width: `${overallPercent}%` }}
@@ -72,20 +86,24 @@ export default function StudentDashboard() {
             Барлығын көру
           </Link>
         </div>
-        <div className="space-y-3">
-          {progress.map((p) => (
-            <div key={p.section_id} className="flex items-center gap-3">
-              <span className="text-sm text-gray-700 w-48 truncate">{p.section_title}</span>
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all"
-                  style={{ width: `${p.percentage}%` }}
-                />
+        {progress.length === 0 ? (
+          <p className="text-gray-400 text-sm">Бөлімдер әлі жоқ</p>
+        ) : (
+          <div className="space-y-3">
+            {progress.map((p) => (
+              <div key={p.section_id} className="flex items-center gap-3">
+                <span className="text-sm text-gray-700 w-48 truncate">{p.section_title}</span>
+                <div className="flex-1 bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-primary h-2 rounded-full transition-all"
+                    style={{ width: `${p.percentage}%` }}
+                  />
+                </div>
+                <span className="text-xs text-gray-500 w-10 text-right">{p.percentage}%</span>
               </div>
-              <span className="text-xs text-gray-500 w-10 text-right">{p.percentage}%</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recent grades */}

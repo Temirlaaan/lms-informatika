@@ -1,12 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './components/common/Toast';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import PublicLayout from './components/layout/PublicLayout';
 import StudentLayout from './components/layout/StudentLayout';
 import TeacherLayout from './components/layout/TeacherLayout';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import GuestRoute from './components/common/GuestRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import NotFoundPage from './pages/NotFoundPage';
+import ProfilePage from './pages/ProfilePage';
 // Student pages
 import StudentDashboard from './pages/student/DashboardPage';
 import SectionsPage from './pages/student/SectionsPage';
@@ -26,44 +31,52 @@ import StudentDetailPage from './pages/teacher/StudentDetailPage';
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Route>
+      <ErrorBoundary>
+        <AuthProvider>
+          <ToastProvider>
+            <Routes>
+              {/* Public routes — redirect logged-in users to dashboard */}
+              <Route element={<GuestRoute />}>
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </Route>
+              </Route>
 
-          {/* Student routes */}
-          <Route element={<ProtectedRoute allowedRoles={['student']} />}>
-            <Route element={<StudentLayout />}>
-              <Route path="/student/dashboard" element={<StudentDashboard />} />
-              <Route path="/student/sections" element={<SectionsPage />} />
-              <Route path="/student/sections/:id" element={<SectionDetailPage />} />
-              <Route path="/student/topics/:id" element={<TopicDetailPage />} />
-              <Route path="/student/grades" element={<GradesPage />} />
-              <Route path="/student/quiz/:id" element={<QuizPage />} />
-              <Route path="/student/quiz/:id/result" element={<QuizResultPage />} />
-            </Route>
-          </Route>
+              {/* Student routes */}
+              <Route element={<ProtectedRoute allowedRoles={['student']} />}>
+                <Route element={<StudentLayout />}>
+                  <Route path="/student/dashboard" element={<StudentDashboard />} />
+                  <Route path="/student/sections" element={<SectionsPage />} />
+                  <Route path="/student/sections/:id" element={<SectionDetailPage />} />
+                  <Route path="/student/topics/:id" element={<TopicDetailPage />} />
+                  <Route path="/student/grades" element={<GradesPage />} />
+                  <Route path="/student/quiz/:id" element={<QuizPage />} />
+                  <Route path="/student/quiz/:id/result" element={<QuizResultPage />} />
+                  <Route path="/student/profile" element={<ProfilePage />} />
+                </Route>
+              </Route>
 
-          {/* Teacher routes */}
-          <Route element={<ProtectedRoute allowedRoles={['teacher']} />}>
-            <Route element={<TeacherLayout />}>
-              <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-              <Route path="/teacher/content" element={<ContentManagerPage />} />
-              <Route path="/teacher/quizzes" element={<QuizManagerPage />} />
-              <Route path="/teacher/gradebook" element={<GradebookPage />} />
-              <Route path="/teacher/students" element={<StudentsListPage />} />
-              <Route path="/teacher/students/:id" element={<StudentDetailPage />} />
-            </Route>
-          </Route>
+              {/* Teacher routes */}
+              <Route element={<ProtectedRoute allowedRoles={['teacher']} />}>
+                <Route element={<TeacherLayout />}>
+                  <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+                  <Route path="/teacher/content" element={<ContentManagerPage />} />
+                  <Route path="/teacher/quizzes" element={<QuizManagerPage />} />
+                  <Route path="/teacher/gradebook" element={<GradebookPage />} />
+                  <Route path="/teacher/students" element={<StudentsListPage />} />
+                  <Route path="/teacher/students/:id" element={<StudentDetailPage />} />
+                  <Route path="/teacher/profile" element={<ProfilePage />} />
+                </Route>
+              </Route>
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </AuthProvider>
+              {/* 404 */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

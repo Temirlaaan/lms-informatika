@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,6 +15,18 @@ export default function TeacherLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Close sidebar on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + '/');
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Mobile header */}
@@ -23,6 +35,7 @@ export default function TeacherLayout() {
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="text-white text-2xl"
+          aria-label={sidebarOpen ? 'Мәзірді жабу' : 'Мәзірді ашу'}
         >
           {sidebarOpen ? '✕' : '☰'}
         </button>
@@ -40,7 +53,9 @@ export default function TeacherLayout() {
             <h2 className="text-lg font-bold text-primary hidden lg:block">LMS Информатика</h2>
             <p className="text-xs text-accent font-medium hidden lg:block">Мұғалім панелі</p>
             <div className="mt-3">
-              <p className="font-medium text-gray-800">{user?.full_name || user?.username}</p>
+              <Link to="/teacher/profile" className="hover:text-primary transition" onClick={() => setSidebarOpen(false)}>
+                <p className="font-medium text-gray-800">{user?.full_name || user?.username}</p>
+              </Link>
             </div>
           </div>
 
@@ -51,7 +66,7 @@ export default function TeacherLayout() {
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                  location.pathname === item.path
+                  isActive(item.path)
                     ? 'bg-primary text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
@@ -60,6 +75,19 @@ export default function TeacherLayout() {
                 <span>{item.label}</span>
               </Link>
             ))}
+
+            <Link
+              to="/teacher/profile"
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                isActive('/teacher/profile')
+                  ? 'bg-primary text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <span>👤</span>
+              <span>Профиль</span>
+            </Link>
 
             <button
               onClick={logout}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { getTopic, completeTopic } from '../../api/courses';
 
 interface LessonImage {
@@ -21,6 +22,7 @@ interface TopicDetail {
   section: number;
   lesson: LessonData | null;
   is_completed: boolean;
+  has_quiz: boolean;
 }
 
 export default function TopicDetailPage() {
@@ -72,7 +74,7 @@ export default function TopicDetailPage() {
         to={`/student/sections/${topic.section}`}
         className="text-primary text-sm hover:underline mb-4 inline-block"
       >
-        ← Бөлімге оралу
+        &larr; Бөлімге оралу
       </Link>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -97,11 +99,11 @@ export default function TopicDetailPage() {
           </div>
         )}
 
-        {/* Content */}
+        {/* Content — sanitized to prevent XSS */}
         {topic.lesson?.content && (
           <div
             className="prose max-w-none mb-6"
-            dangerouslySetInnerHTML={{ __html: topic.lesson.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(topic.lesson.content) }}
           />
         )}
 
@@ -130,14 +132,24 @@ export default function TopicDetailPage() {
               {completing ? 'Күте тұрыңыз...' : 'Тақырыпты аяқтау'}
             </button>
           )}
-          <Link
-            to={`/student/quiz/${topic.id}`}
-            className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
-          >
-            Тестке өту
-          </Link>
         </div>
       </div>
+
+      {/* Prominent Quiz Navigation — only shown when quiz exists */}
+      {topic.has_quiz && (
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-center">
+          <p className="text-blue-100 mb-3 text-sm">Сабақты оқып болдыңыз ба? Білімді тексеріңіз!</p>
+          <Link
+            to={`/student/quiz/${topic.id}`}
+            className="inline-flex items-center gap-2 bg-white text-blue-700 px-8 py-3 rounded-lg text-lg font-bold hover:bg-blue-50 transition shadow"
+          >
+            Тестке өту
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

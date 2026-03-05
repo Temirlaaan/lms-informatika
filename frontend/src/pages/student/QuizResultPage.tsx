@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { getAttemptDetail } from '../../api/quizzes';
+import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
+import { getAttemptDetail, getAttempts } from '../../api/quizzes';
 
 interface ChoiceResult {
   id: number;
@@ -42,23 +42,38 @@ function gradeFromScore(score: number): number {
 }
 
 export default function QuizResultPage() {
+  const { id: topicId } = useParams<{ id: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const [result, setResult] = useState<AttemptResult | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const { attemptId } = (location.state || {}) as { quizId?: number; attemptId?: number };
+  const stateAttemptId = (location.state as { attemptId?: number } | null)?.attemptId;
 
   useEffect(() => {
-    if (!attemptId) {
-      navigate('/student/sections');
-      return;
+    if (stateAttemptId) {
+      // Came from quiz submission — use the attempt ID directly
+      getAttemptDetail(stateAttemptId)
+        .then((r) => setResult(r.data))
+        .catch(() => navigate('/student/sections'))
+        .finally(() => setLoading(false));
+    } else {
+      // Page refresh — find the latest completed attempt for this quiz via attempts list
+      getAttempts()
+        .then((r) => {
+          const attempts = r.data as { id: number; quiz: number; is_completed: boolean }[];
+          // Find latest completed attempt (list is ordered by most recent first)
+          const latest = attempts.find((a) => a.is_completed);
+          if (latest) {
+            return getAttemptDetail(latest.id);
+          }
+          throw new Error('No attempts found');
+        })
+        .then((r) => setResult(r.data))
+        .catch(() => navigate('/student/sections'))
+        .finally(() => setLoading(false));
     }
-    getAttemptDetail(attemptId)
-      .then((r) => setResult(r.data))
-      .catch(() => navigate('/student/sections'))
-      .finally(() => setLoading(false));
-  }, [attemptId, navigate]);
+  }, [stateAttemptId, topicId, navigate]);
 
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;

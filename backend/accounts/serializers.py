@@ -25,10 +25,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['password'] != attrs.pop('password_confirm'):
-            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
+            raise serializers.ValidationError({'password_confirm': 'Құпиясөздер сәйкес келмейді.'})
 
-        if attrs.get('role') == 'student' and not attrs.get('grade_class'):
-            raise serializers.ValidationError({'grade_class': 'Grade class is required for students.'})
+        # Security: force student role on public registration.
+        # Teachers must be created by an admin via Django admin panel.
+        attrs['role'] = 'student'
+
+        if not attrs.get('grade_class'):
+            raise serializers.ValidationError({'grade_class': 'Сынып көрсетілуі тиіс.'})
 
         return attrs
 

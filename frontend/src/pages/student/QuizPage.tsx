@@ -27,6 +27,11 @@ interface QuizData {
   attempts_used?: number;
 }
 
+/** Build a localStorage key for this quiz attempt's end-time */
+function timerKey(quizId: number, attemptId: number) {
+  return `quiz_end_${quizId}_${attemptId}`;
+}
+
 export default function QuizPage() {
   const { id: topicId } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -45,6 +50,9 @@ export default function QuizPage() {
     submittedRef.current = true;
     setSubmitting(true);
     if (timerRef.current) clearInterval(timerRef.current);
+
+    // Clean up timer from localStorage
+    localStorage.removeItem(timerKey(quiz.id, attemptId));
 
     const payload = Object.entries(answers).map(([qId, cIds]) => ({
       question_id: Number(qId),
@@ -84,8 +92,29 @@ export default function QuizPage() {
       })
       .then((r) => {
         if (r) {
-          setAttemptId(r.data.attempt_id);
-          setTimeLeft(quizData.time_limit_minutes * 60);
+          const aId = r.data.attempt_id;
+          setAttemptId(aId);
+
+          // Resilient timer: check localStorage first, then compute from started_at
+          const key = timerKey(quizData.id, aId);
+          const storedEnd = localStorage.getItem(key);
+          let endTimeMs: number;
+
+          if (storedEnd) {
+            endTimeMs = Number(storedEnd);
+          } else if (r.data.started_at) {
+            // Backend returned started_at — compute end time from it
+            const startedMs = new Date(r.data.started_at).getTime();
+            endTimeMs = startedMs + quizData.time_limit_minutes * 60 * 1000;
+            localStorage.setItem(key, String(endTimeMs));
+          } else {
+            // Fallback: start fresh timer from now
+            endTimeMs = Date.now() + quizData.time_limit_minutes * 60 * 1000;
+            localStorage.setItem(key, String(endTimeMs));
+          }
+
+          const remaining = Math.max(0, Math.floor((endTimeMs - Date.now()) / 1000));
+          setTimeLeft(remaining);
         }
       })
       .catch(() => setError('Тестті жүктеу мүмкін болмады'))
@@ -108,7 +137,7 @@ export default function QuizPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [attemptId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [attemptId, timeLeft > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectChoice = (questionId: number, choiceId: number, type: string) => {
     setAnswers((prev) => {
@@ -139,7 +168,7 @@ export default function QuizPage() {
     return (
       <div className="text-center py-12">
         <p className="text-red-500 mb-4">{error}</p>
-        <button onClick={() => navigate(-1)} className="text-primary hover:underline">← Артқа</button>
+        <button onClick={() => navigate(-1)} className="text-primary hover:underline">&larr; Артқа</button>
       </div>
     );
   }
@@ -151,7 +180,7 @@ export default function QuizPage() {
       <div className="max-w-2xl mx-auto text-center py-12">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">{quiz.title}</h1>
         <p className="text-red-500 text-lg mb-4">Әрекет лимитіне жеттіңіз ({quiz.max_attempts}/{quiz.max_attempts})</p>
-        <button onClick={() => navigate(-1)} className="text-primary hover:underline">← Артқа</button>
+        <button onClick={() => navigate(-1)} className="text-primary hover:underline">&larr; Артқа</button>
       </div>
     );
   }

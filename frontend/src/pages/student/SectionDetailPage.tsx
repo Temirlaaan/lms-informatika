@@ -74,7 +74,7 @@ export default function SectionDetailPage() {
           <Link
             key={topic.id}
             to={`/student/topics/${topic.id}`}
-            className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4 flex items-center justify-between block"
+            className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${

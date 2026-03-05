@@ -92,7 +92,7 @@ export default function StudentDetailPage() {
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{g.section_name}</td>
                   <td className="px-6 py-4 text-center">
                     <span
-                      className={`inline-block w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${gradeColor(g.grade_value)}`}
+                      className={`w-8 h-8 rounded-full inline-flex items-center justify-center text-sm font-bold ${gradeColor(g.grade_value)}`}
                     >
                       {g.grade_value}
                     </span>

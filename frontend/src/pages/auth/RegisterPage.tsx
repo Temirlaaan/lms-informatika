@@ -9,7 +9,7 @@ export default function RegisterPage() {
     username: '',
     password: '',
     password_confirm: '',
-    role: 'student' as 'student' | 'teacher',
+    role: 'student' as const,
     grade_class: '',
   });
   const [error, setError] = useState('');
@@ -19,12 +19,17 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
+    if (form.password.length < 8) {
+      setError('Құпиясөз кемінде 8 таңбадан тұруы керек');
+      return;
+    }
+
     if (form.password !== form.password_confirm) {
       setError('Құпиясөздер сәйкес келмейді');
       return;
     }
 
-    if (form.role === 'student' && !form.grade_class) {
+    if (!form.grade_class) {
       setError('Сынып көрсетілуі тиіс');
       return;
     }
@@ -89,7 +94,9 @@ export default function RegisterPage() {
               onChange={(e) => updateField('password', e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               required
+              minLength={8}
             />
+            <p className="text-xs text-gray-400 mt-1">Кемінде 8 таңба</p>
           </div>
 
           <div>
@@ -106,45 +113,16 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Рөл</label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="role"
-                  value="student"
-                  checked={form.role === 'student'}
-                  onChange={(e) => updateField('role', e.target.value)}
-                  className="text-primary"
-                />
-                <span>Оқушы</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="role"
-                  value="teacher"
-                  checked={form.role === 'teacher'}
-                  onChange={(e) => updateField('role', e.target.value)}
-                  className="text-primary"
-                />
-                <span>Мұғалім</span>
-              </label>
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Сынып</label>
+            <input
+              type="text"
+              value={form.grade_class}
+              onChange={(e) => updateField('grade_class', e.target.value)}
+              placeholder="Мысалы: 5А"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+              required
+            />
           </div>
-
-          {form.role === 'student' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Сынып</label>
-              <input
-                type="text"
-                value={form.grade_class}
-                onChange={(e) => updateField('grade_class', e.target.value)}
-                placeholder="Мысалы: 5А"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
-              />
-            </div>
-          )}
 
           <button
             type="submit"
