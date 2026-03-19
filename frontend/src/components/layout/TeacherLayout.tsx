@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Home, FileEdit, ClipboardCheck, Award, Users, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/teacher/dashboard', label: 'Басты бет', icon: '🏠' },
-  { path: '/teacher/content', label: 'Контент', icon: '📝' },
-  { path: '/teacher/quizzes', label: 'Тесттер', icon: '✅' },
-  { path: '/teacher/gradebook', label: 'Журнал', icon: '📊' },
-  { path: '/teacher/students', label: 'Оқушылар', icon: '👥' },
+  { path: '/teacher/dashboard', label: 'Басты бет', icon: Home },
+  { path: '/teacher/content', label: 'Контент', icon: FileEdit },
+  { path: '/teacher/quizzes', label: 'Тесттер', icon: ClipboardCheck },
+  { path: '/teacher/gradebook', label: 'Журнал', icon: Award },
+  { path: '/teacher/students', label: 'Оқушылар', icon: Users },
 ];
 
 export default function TeacherLayout() {
@@ -15,7 +19,6 @@ export default function TeacherLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Close sidebar on Escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setSidebarOpen(false);
@@ -28,74 +31,81 @@ export default function TeacherLayout() {
     location.pathname === path || location.pathname.startsWith(path + '/');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <div className="lg:hidden bg-primary text-white p-4 flex justify-between items-center">
+      <div className="lg:hidden bg-primary text-primary-foreground p-4 flex justify-between items-center">
         <span className="font-bold">LMS Информатика — Мұғалім</span>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-primary-foreground hover:bg-primary/80"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="text-white text-2xl"
           aria-label={sidebarOpen ? 'Мәзірді жабу' : 'Мәзірді ашу'}
         >
-          {sidebarOpen ? '✕' : '☰'}
-        </button>
+          {sidebarOpen ? <X /> : <Menu />}
+        </Button>
       </div>
 
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`
-            fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform
-            lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          `}
+          className={cn(
+            "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card shadow-lg transform transition-transform lg:translate-x-0",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          )}
         >
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-bold text-primary hidden lg:block">LMS Информатика</h2>
-            <p className="text-xs text-accent font-medium hidden lg:block">Мұғалім панелі</p>
-            <div className="mt-3">
-              <Link to="/teacher/profile" className="hover:text-primary transition" onClick={() => setSidebarOpen(false)}>
-                <p className="font-medium text-gray-800">{user?.full_name || user?.username}</p>
-              </Link>
+          <div className="p-6 border-b flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-primary hidden lg:block">LMS Информатика</h2>
+              <p className="text-xs text-accent font-medium hidden lg:block">Мұғалім панелі</p>
+              <div className="mt-3">
+                <Link to="/teacher/profile" className="hover:text-primary transition" onClick={() => setSidebarOpen(false)}>
+                  <p className="font-medium text-card-foreground">{user?.full_name || user?.username}</p>
+                </Link>
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <ThemeToggle />
             </div>
           </div>
 
           <nav className="p-4 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                  isActive(item.path)
-                    ? 'bg-primary text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={item.path}
+                  variant={isActive(item.path) ? "default" : "ghost"}
+                  className="w-full justify-start gap-3"
+                  asChild
+                >
+                  <Link to={item.path} onClick={() => setSidebarOpen(false)}>
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                </Button>
+              );
+            })}
+
+            <Button
+              variant={isActive('/teacher/profile') ? "default" : "ghost"}
+              className="w-full justify-start gap-3"
+              asChild
+            >
+              <Link to="/teacher/profile" onClick={() => setSidebarOpen(false)}>
+                <User className="h-4 w-4" />
+                Профиль
               </Link>
-            ))}
+            </Button>
 
-            <Link
-              to="/teacher/profile"
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                isActive('/teacher/profile')
-                  ? 'bg-primary text-white'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <span>👤</span>
-              <span>Профиль</span>
-            </Link>
-
-            <button
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={logout}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition w-full"
             >
-              <span>🚪</span>
-              <span>Шығу</span>
-            </button>
+              <LogOut className="h-4 w-4" />
+              Шығу
+            </Button>
           </nav>
         </aside>
 

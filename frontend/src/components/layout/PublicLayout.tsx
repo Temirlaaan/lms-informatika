@@ -1,39 +1,37 @@
 import { Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function PublicLayout() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="text-xl font-bold text-primary">
               LMS Информатика
             </Link>
-            <nav className="flex items-center gap-4">
+            <nav className="flex items-center gap-2">
+              <ThemeToggle />
               {user ? (
-                <Link
-                  to={user.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'}
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                >
-                  {user.full_name || user.username}
-                </Link>
+                <Button asChild>
+                  <Link
+                    to={user.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard'}
+                  >
+                    {user.full_name || user.username}
+                  </Link>
+                </Button>
               ) : (
                 <>
-                  <Link
-                    to="/login"
-                    className="text-gray-600 hover:text-primary transition"
-                  >
-                    Кіру
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                  >
-                    Тіркелу
-                  </Link>
+                  <Button variant="ghost" asChild>
+                    <Link to="/login">Кіру</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to="/register">Тіркелу</Link>
+                  </Button>
                 </>
               )}
             </nav>
