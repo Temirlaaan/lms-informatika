@@ -121,6 +121,12 @@ class TeacherLessonImageSerializer(serializers.ModelSerializer):
         model = LessonImage
         fields = ['id', 'lesson', 'image', 'caption']
 
+    def validate_image(self, value):
+        max_size = 5 * 1024 * 1024  # 5 MB
+        if value.size > max_size:
+            raise serializers.ValidationError('Сурет файлы тым үлкен (макс. 5 МБ)')
+        return value
+
 
 class TeacherLessonSerializer(serializers.ModelSerializer):
     video_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)

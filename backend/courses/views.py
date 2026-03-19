@@ -108,3 +108,12 @@ class TeacherLessonImageViewSet(viewsets.GenericViewSet,
     permission_classes = [IsTeacher]
     serializer_class = TeacherLessonImageSerializer
     queryset = LessonImage.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        lesson_id = request.data.get('lesson')
+        if lesson_id and LessonImage.objects.filter(lesson_id=lesson_id).count() >= 20:
+            return Response(
+                {'detail': 'Сабаққа 20-дан артық сурет қосу мүмкін емес'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().create(request, *args, **kwargs)

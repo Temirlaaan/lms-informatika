@@ -32,24 +32,24 @@
 
 /* Dark mode overrides - Slate (deep navy-gray, NOT pure black) */
 .dark {
-  --color-background: oklch(0.129 0.042 264.695);
+  --color-background: oklch(0.145 0.030 264.695);
   --color-foreground: oklch(0.966 0.007 264.695);
-  --color-card: oklch(0.156 0.036 264.695);
+  --color-card: oklch(0.178 0.026 264.695);
   --color-card-foreground: oklch(0.966 0.007 264.695);
-  --color-popover: oklch(0.156 0.036 264.695);
+  --color-popover: oklch(0.178 0.026 264.695);
   --color-popover-foreground: oklch(0.966 0.007 264.695);
   --color-primary: #3b82f6;
   --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.208 0.042 265.755);
+  --color-secondary: oklch(0.230 0.035 265.755);
   --color-secondary-foreground: oklch(0.966 0.007 264.695);
-  --color-muted: oklch(0.208 0.042 265.755);
-  --color-muted-foreground: oklch(0.604 0.023 264.695);
+  --color-muted: oklch(0.230 0.035 265.755);
+  --color-muted-foreground: oklch(0.650 0.020 264.695);
   --color-accent: #34d399;
   --color-accent-foreground: oklch(0.129 0.042 264.695);
   --color-destructive: oklch(0.704 0.191 22.216);
   --color-destructive-foreground: oklch(0.985 0 0);
-  --color-border: oklch(0.278 0.029 264.695);
-  --color-input: oklch(0.278 0.029 264.695);
+  --color-border: oklch(0.300 0.025 264.695);
+  --color-input: oklch(0.300 0.025 264.695);
   --color-ring: oklch(0.551 0.027 264.695);
 }
 

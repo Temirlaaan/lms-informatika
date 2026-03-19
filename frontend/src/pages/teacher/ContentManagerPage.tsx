@@ -249,6 +249,13 @@ function LessonEditor({
       alert('Алдымен сабақты сақтаңыз');
       return;
     }
+    const maxSize = 5 * 1024 * 1024;
+    for (const file of Array.from(files)) {
+      if (file.size > maxSize) {
+        alert(`Файл өте үлкен: ${file.name} (макс. 5МБ)`);
+        return;
+      }
+    }
     setUploading(true);
     try {
       for (const file of Array.from(files)) {

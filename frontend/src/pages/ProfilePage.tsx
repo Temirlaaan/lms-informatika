@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent } from 'react';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../api/auth';
 import { useToast } from '../components/common/Toast';
@@ -13,7 +13,18 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    return () => {
+      if (avatarPreview && avatarPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
   const handleAvatarSelect = (file: File) => {
+    if (avatarPreview && avatarPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(avatarPreview);
+    }
     setAvatarFile(file);
     const url = URL.createObjectURL(file);
     setAvatarPreview(url);
@@ -35,6 +46,7 @@ export default function ProfilePage() {
       await refreshUser();
       setAvatarFile(null);
       setAvatarPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       showToast('Профиль сәтті сақталды', 'success');
     } catch {
       showToast('Профильді сақтау кезінде қате орын алды', 'error');
