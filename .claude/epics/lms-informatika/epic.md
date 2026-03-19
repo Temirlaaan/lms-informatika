@@ -1,8 +1,8 @@
 ---
 name: lms-informatika
-status: backlog
+status: completed
 created: 2026-03-03T10:37:56Z
-progress: 0%
+progress: 100%
 prd: .claude/prds/lms-informatika.md
 github: https://github.com/Temirlaaan/lms-informatika/issues/1
 ---

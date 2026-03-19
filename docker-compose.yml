@@ -2,7 +2,11 @@ services:
   backend:
     build: ./backend
     container_name: lms-backend
-    network_mode: host
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
       - DB_DIR=/app/data
@@ -17,7 +21,8 @@ services:
   frontend:
     build: ./frontend
     container_name: lms-frontend
-    network_mode: host
+    ports:
+      - "3000:80"
     depends_on:
       - backend
 
