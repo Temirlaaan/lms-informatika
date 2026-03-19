@@ -81,7 +81,8 @@ class SectionListSerializer(serializers.ModelSerializer):
             if total == 0:
                 return 0
             completed = TopicProgress.objects.filter(
-                student=request.user, topic__section=obj, is_completed=True
+                student=request.user, topic__section=obj, is_completed=True,
+                topic__is_published=True
             ).count()
             return round((completed / total) * 100)
         return 0

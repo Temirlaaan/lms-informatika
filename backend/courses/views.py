@@ -68,7 +68,8 @@ class ProgressView(generics.GenericAPIView):
         for section in sections:
             total = section.topics.filter(is_published=True).count()
             completed = TopicProgress.objects.filter(
-                student=request.user, topic__section=section, is_completed=True
+                student=request.user, topic__section=section, is_completed=True,
+                topic__is_published=True
             ).count()
             data.append({
                 'section_id': section.id,

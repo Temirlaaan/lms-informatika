@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
-import { getAttemptDetail, getAttempts } from '../../api/quizzes';
+import { getAttemptDetail, getAttempts, getQuizByTopic } from '../../api/quizzes';
 
 interface ChoiceResult {
   id: number;
@@ -58,16 +58,18 @@ export default function QuizResultPage() {
         .catch(() => navigate('/student/sections'))
         .finally(() => setLoading(false));
     } else {
-      // Page refresh — find the latest completed attempt for this quiz via attempts list
-      getAttempts()
-        .then((r) => {
-          const attempts = r.data as { id: number; quiz: number; is_completed: boolean }[];
-          // Find latest completed attempt (list is ordered by most recent first)
-          const latest = attempts.find((a) => a.is_completed);
-          if (latest) {
-            return getAttemptDetail(latest.id);
-          }
-          throw new Error('No attempts found');
+      // Page refresh — find the latest completed attempt strictly for THIS topic's quiz
+      getQuizByTopic(Number(topicId))
+        .then((quizRes) => {
+          const quizId = quizRes.data.id;
+          return getAttempts().then((r) => {
+            const attempts = r.data as { id: number; quiz: number; is_completed: boolean }[];
+            const latest = attempts.find((a) => a.is_completed && a.quiz === quizId);
+            if (latest) {
+              return getAttemptDetail(latest.id);
+            }
+            throw new Error('No attempts found');
+          });
         })
         .then((r) => setResult(r.data))
         .catch(() => navigate('/student/sections'))

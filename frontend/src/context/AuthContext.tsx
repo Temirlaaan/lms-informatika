@@ -59,6 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith('quiz_end_'))
+      .forEach((key) => localStorage.removeItem(key));
     setUser(null);
     navigate('/');
   };
