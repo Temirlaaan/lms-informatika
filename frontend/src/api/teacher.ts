@@ -35,5 +35,14 @@ export const createChoice = (data: { question: number; text: string; is_correct:
 export const updateChoice = (id: number, data: Partial<Choice>) => api.put(`/quizzes/teacher/choices/${id}/`, data);
 export const deleteChoice = (id: number) => api.delete(`/quizzes/teacher/choices/${id}/`);
 
+// Lesson Images
+export const uploadLessonImage = (data: FormData) =>
+  api.post('/courses/teacher/lesson-images/', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+export const deleteLessonImage = (id: number) =>
+  api.delete(`/courses/teacher/lesson-images/${id}/`);
+
 // Students
 export const getStudents = () => api.get('/auth/students/');

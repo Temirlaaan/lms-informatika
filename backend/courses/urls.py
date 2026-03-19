@@ -8,6 +8,7 @@ router.register(r'topics', views.TopicViewSet, basename='topic')
 router.register(r'teacher/sections', views.TeacherSectionViewSet, basename='teacher-section')
 router.register(r'teacher/topics', views.TeacherTopicViewSet, basename='teacher-topic')
 router.register(r'teacher/lessons', views.TeacherLessonViewSet, basename='teacher-lesson')
+router.register(r'teacher/lesson-images', views.TeacherLessonImageViewSet, basename='teacher-lesson-image')
 
 urlpatterns = [
     path('', include(router.urls)),

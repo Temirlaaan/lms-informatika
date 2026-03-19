@@ -41,7 +41,7 @@ export default function StudentLayout() {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <div className="lg:hidden bg-primary text-primary-foreground p-4 flex justify-between items-center">
+      <div className="lg:hidden bg-primary text-primary-foreground p-4 flex justify-between items-center border-b">
         <span className="font-bold">LMS Информатика</span>
         <Button
           variant="ghost"
@@ -58,7 +58,7 @@ export default function StudentLayout() {
         {/* Sidebar */}
         <aside
           className={cn(
-            "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card shadow-lg transform transition-transform lg:translate-x-0",
+            "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card shadow-lg border-r transform transition-transform lg:translate-x-0",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
@@ -129,7 +129,9 @@ export default function StudentLayout() {
 
         {/* Main content */}
         <main className="flex-1 p-6 lg:p-8">
-          <Outlet />
+          <div className="mx-auto max-w-6xl">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

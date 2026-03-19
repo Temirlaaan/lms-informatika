@@ -116,12 +116,19 @@ class TeacherTopicSerializer(serializers.ModelSerializer):
         fields = ['id', 'section', 'title', 'order', 'is_published']
 
 
+class TeacherLessonImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonImage
+        fields = ['id', 'lesson', 'image', 'caption']
+
+
 class TeacherLessonSerializer(serializers.ModelSerializer):
     video_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+    images = LessonImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Lesson
-        fields = ['id', 'topic', 'content', 'video_url']
+        fields = ['id', 'topic', 'content', 'video_url', 'images']
 
     def validate_video_url(self, value):
         """Convert empty strings to None so Django's URLField doesn't error."""

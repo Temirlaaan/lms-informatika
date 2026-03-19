@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.permissions import IsStudent, IsTeacher
-from .models import Section, Topic, Lesson, TopicProgress
+from .models import Section, Topic, Lesson, LessonImage, TopicProgress
 from .serializers import (
     SectionListSerializer,
     SectionDetailSerializer,
@@ -13,6 +13,7 @@ from .serializers import (
     TeacherSectionSerializer,
     TeacherTopicSerializer,
     TeacherLessonSerializer,
+    TeacherLessonImageSerializer,
 )
 
 
@@ -99,3 +100,11 @@ class TeacherLessonViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Lesson.objects.all()
+
+
+class TeacherLessonImageViewSet(viewsets.GenericViewSet,
+                                viewsets.mixins.CreateModelMixin,
+                                viewsets.mixins.DestroyModelMixin):
+    permission_classes = [IsTeacher]
+    serializer_class = TeacherLessonImageSerializer
+    queryset = LessonImage.objects.all()

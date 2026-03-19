@@ -24,11 +24,18 @@ export interface Topic {
   is_published: boolean;
 }
 
+export interface LessonImage {
+  id: number;
+  image: string;
+  caption: string;
+}
+
 export interface Lesson {
   id: number;
   topic: number;
   content: string;
   video_url?: string;
+  images?: LessonImage[];
 }
 
 export interface Quiz {

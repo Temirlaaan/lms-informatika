@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import type { Section, Topic, Lesson } from '../../types';
+import type { Section, Topic, Lesson, LessonImage } from '../../types';
 import {
   getTeacherSections,
   createSection,
@@ -15,6 +15,8 @@ import {
   createLesson,
   updateLesson,
   deleteLesson,
+  uploadLessonImage,
+  deleteLessonImage,
 } from '../../api/teacher';
 
 /**
@@ -197,16 +199,18 @@ function LessonEditor({
   const [content, setContent] = useState(lesson?.content ?? '');
   const [videoUrl, setVideoUrl] = useState(lesson?.video_url ?? '');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [images, setImages] = useState<LessonImage[]>(lesson?.images ?? []);
 
   useEffect(() => {
     setContent(lesson?.content ?? '');
     setVideoUrl(lesson?.video_url ?? '');
+    setImages(lesson?.images ?? []);
   }, [lesson]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Convert YouTube URL to embed format, send null if empty
       const trimmedUrl = videoUrl.trim();
       const processedUrl = trimmedUrl ? (toYouTubeEmbedUrl(trimmedUrl) || trimmedUrl) : null;
 
@@ -239,10 +243,36 @@ function LessonEditor({
     }
   };
 
-  const handleImageUpload = (files: FileList | null) => {
+  const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    // TODO: Implement actual image upload via Axios
-    alert(`${files.length} сурет таңдалды. Жүктеу функциясы жақында қосылады.`);
+    if (!lesson) {
+      alert('Алдымен сабақты сақтаңыз');
+      return;
+    }
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append('lesson', String(lesson.id));
+        formData.append('image', file);
+        await uploadLessonImage(formData);
+      }
+      onSaved();
+    } catch {
+      alert('Суретті жүктеу кезінде қате орын алды');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: number) => {
+    if (!confirm('Суретті жою керек пе?')) return;
+    try {
+      await deleteLessonImage(imageId);
+      setImages((prev) => prev.filter((img) => img.id !== imageId));
+    } catch {
+      alert('Суретті жою кезінде қате орын алды');
+    }
   };
 
   return (
@@ -283,25 +313,59 @@ function LessonEditor({
         )}
       </div>
 
-      {/* Image Upload Scaffold */}
+      {/* Image Upload */}
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
         <h4 className="text-sm font-semibold text-gray-700 mb-2">Сабақ суреттері</h4>
-        <p className="text-xs text-gray-500 mb-3">
-          Сабаққа қатысты суреттерді жүктеңіз (PNG, JPG, WEBP)
-        </p>
-        <label className="inline-flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Суреттерді таңдау
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleImageUpload(e.target.files)}
-          />
-        </label>
+        {!lesson ? (
+          <p className="text-xs text-amber-600">
+            Алдымен сабақты сақтаңыз, содан кейін суреттерді жүктей аласыз
+          </p>
+        ) : (
+          <>
+            <p className="text-xs text-gray-500 mb-3">
+              Сабаққа қатысты суреттерді жүктеңіз (PNG, JPG, WEBP)
+            </p>
+            <label className={`inline-flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {uploading ? 'Жүктелуде...' : 'Суреттерді таңдау'}
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageUpload(e.target.files)}
+                disabled={uploading}
+              />
+            </label>
+
+            {/* Image Gallery */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+                {images.map((img) => (
+                  <div key={img.id} className="relative group rounded-lg overflow-hidden border">
+                    <img
+                      src={img.image}
+                      alt={img.caption || 'Сабақ суреті'}
+                      className="w-full h-32 object-cover"
+                    />
+                    <button
+                      onClick={() => handleDeleteImage(img.id)}
+                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition hover:bg-red-700"
+                      title="Жою"
+                    >
+                      &times;
+                    </button>
+                    {img.caption && (
+                      <p className="text-xs text-gray-600 p-1 truncate">{img.caption}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Actions */}

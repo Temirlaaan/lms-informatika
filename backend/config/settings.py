@@ -107,6 +107,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+
 _cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS')
 if _cors_origins:
     CORS_ALLOWED_ORIGINS = _cors_origins.split(',')
