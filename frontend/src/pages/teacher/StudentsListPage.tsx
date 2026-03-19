@@ -30,30 +30,30 @@ export default function StudentsListPage() {
     fetchStudents();
   }, []);
 
-  if (loading) return <p className="text-gray-600">Жүктелуде...</p>;
+  if (loading) return <p className="text-muted-foreground">Жүктелуде...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Оқушылар</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-4">Оқушылар</h1>
 
       {students.length === 0 ? (
-        <p className="text-gray-500">Оқушылар жоқ</p>
+        <p className="text-muted-foreground">Оқушылар жоқ</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-card rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-secondary">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Аты-жөні</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Әрекет</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">#</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Аты-жөні</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Әрекет</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {students.map((s, idx) => (
-                <tr key={s.student_id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-500">{idx + 1}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{s.student_name}</td>
+                <tr key={s.student_id} className="hover:bg-secondary">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">{idx + 1}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-foreground">{s.student_name}</td>
                   <td className="px-6 py-4 text-right">
                     <button
                       onClick={() => navigate(`/teacher/students/${s.student_id}`)}

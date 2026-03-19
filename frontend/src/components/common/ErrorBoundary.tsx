@@ -18,11 +18,11 @@ export default class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex items-center justify-center min-h-screen bg-background">
           <div className="text-center p-8 max-w-md">
             <div className="text-6xl mb-4">:(</div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Бірдеңе дұрыс болмады</h1>
-            <p className="text-gray-600 mb-6">Қосымшада күтпеген қате орын алды.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Бірдеңе дұрыс болмады</h1>
+            <p className="text-muted-foreground mb-6">Қосымшада күтпеген қате орын алды.</p>
             <button
               onClick={() => {
                 this.setState({ hasError: false });

@@ -11,11 +11,11 @@ export default function NotFoundPage() {
     : '/';
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="text-center p-8 max-w-md">
         <h1 className="text-8xl font-bold text-primary mb-2">404</h1>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Бет табылмады</h2>
-        <p className="text-gray-600 mb-6">
+        <h2 className="text-2xl font-bold text-foreground mb-2">Бет табылмады</h2>
+        <p className="text-muted-foreground mb-6">
           Сіз іздеген бет табылмады немесе жойылған.
         </p>
         <Link

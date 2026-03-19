@@ -3,9 +3,16 @@ from .models import Section, Topic, Lesson, LessonImage, TopicProgress
 
 
 class LessonImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = LessonImage
         fields = ['id', 'image', 'caption']
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -117,9 +124,16 @@ class TeacherTopicSerializer(serializers.ModelSerializer):
 
 
 class TeacherLessonImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = LessonImage
-        fields = ['id', 'lesson', 'image', 'caption']
+        fields = ['id', 'lesson', 'image', 'image_url', 'caption']
+
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
     def validate_image(self, value):
         max_size = 5 * 1024 * 1024  # 5 MB

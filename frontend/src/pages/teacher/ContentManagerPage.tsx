@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import type { Section, Topic, Lesson, LessonImage } from '../../types';
@@ -34,16 +34,14 @@ function toYouTubeEmbedUrl(url: string): string | null {
   return `https://www.youtube.com/embed/${match[1]}`;
 }
 
-const quillModules = {
-  toolbar: [
-    [{ header: [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['blockquote', 'code-block'],
-    ['link', 'image'],
-    ['clean'],
-  ],
-};
+const quillToolbar = [
+  [{ header: [1, 2, 3, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  ['blockquote', 'code-block'],
+  ['link', 'image'],
+  ['clean'],
+];
 
 /* ─── Section Form ─── */
 function SectionForm({
@@ -67,10 +65,10 @@ function SectionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-50 border rounded-lg p-4 mb-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-secondary border rounded-lg p-4 mb-4 space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Атауы</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Атауы</label>
           <input
             className="w-full border rounded px-3 py-2 text-sm"
             value={title}
@@ -79,7 +77,7 @@ function SectionForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Иконка</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Иконка</label>
           <input
             className="w-full border rounded px-3 py-2 text-sm"
             value={icon}
@@ -88,7 +86,7 @@ function SectionForm({
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Сипаттама</label>
+        <label className="block text-sm font-medium text-foreground mb-1">Сипаттама</label>
         <textarea
           className="w-full border rounded px-3 py-2 text-sm"
           rows={2}
@@ -98,7 +96,7 @@ function SectionForm({
       </div>
       <div className="flex items-center gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Реттілік</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Реттілік</label>
           <input
             type="number"
             className="w-24 border rounded px-3 py-2 text-sm"
@@ -112,14 +110,14 @@ function SectionForm({
             checked={isPublished}
             onChange={(e) => setIsPublished(e.target.checked)}
           />
-          <span className="text-sm text-gray-700">Жарияланған</span>
+          <span className="text-sm text-foreground">Жарияланған</span>
         </label>
       </div>
       <div className="flex gap-2">
         <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700">
           Сақтау
         </button>
-        <button type="button" onClick={onCancel} className="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">
+        <button type="button" onClick={onCancel} className="bg-gray-300 text-foreground px-4 py-2 rounded text-sm hover:bg-gray-400">
           Болдырмау
         </button>
       </div>
@@ -149,10 +147,10 @@ function TopicForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border rounded p-3 mb-2 space-y-2">
+    <form onSubmit={handleSubmit} className="bg-card border rounded p-3 mb-2 space-y-2">
       <div className="flex gap-3 items-end">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Тақырып атауы</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Тақырып атауы</label>
           <input
             className="w-full border rounded px-3 py-2 text-sm"
             value={title}
@@ -161,7 +159,7 @@ function TopicForm({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Реттілік</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Реттілік</label>
           <input
             type="number"
             className="w-20 border rounded px-3 py-2 text-sm"
@@ -171,14 +169,14 @@ function TopicForm({
         </div>
         <label className="flex items-center gap-1 pb-2">
           <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} />
-          <span className="text-xs text-gray-600">Жарияланған</span>
+          <span className="text-xs text-muted-foreground">Жарияланған</span>
         </label>
       </div>
       <div className="flex gap-2">
         <button type="submit" className="bg-green-600 text-white px-3 py-1.5 rounded text-sm hover:bg-green-700">
           Сақтау
         </button>
-        <button type="button" onClick={onCancel} className="bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-sm hover:bg-gray-400">
+        <button type="button" onClick={onCancel} className="bg-gray-300 text-foreground px-3 py-1.5 rounded text-sm hover:bg-gray-400">
           Болдырмау
         </button>
       </div>
@@ -201,12 +199,59 @@ function LessonEditor({
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<LessonImage[]>(lesson?.images ?? []);
+  const quillRef = useRef<ReactQuill | null>(null);
 
   useEffect(() => {
     setContent(lesson?.content ?? '');
     setVideoUrl(lesson?.video_url ?? '');
     setImages(lesson?.images ?? []);
   }, [lesson]);
+
+  const imageHandler = useCallback(() => {
+    if (!lesson) {
+      alert('Алдымен сабақты сақтаңыз, содан кейін суреттерді қоса аласыз');
+      return;
+    }
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Файл өте үлкен (макс. 5МБ)');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('lesson', String(lesson.id));
+      formData.append('image', file);
+      try {
+        const res = await uploadLessonImage(formData);
+        const url: string | undefined = res.data.image_url || res.data.image;
+        if (!url || (!url.startsWith('/media/') && !url.startsWith('http'))) {
+          alert('Серверден қате жауап келді');
+          return;
+        }
+        const editor = quillRef.current?.getEditor();
+        if (editor) {
+          const range = editor.getSelection(true);
+          editor.insertEmbed(range.index, 'image', url);
+        }
+      } catch {
+        alert('Суретті жүктеу кезінде қате орын алды');
+      }
+    };
+  }, [lesson]);
+
+  const quillModules = useMemo(() => ({
+    toolbar: {
+      container: quillToolbar,
+      handlers: {
+        image: imageHandler,
+      },
+    },
+  }), [imageHandler]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -283,23 +328,24 @@ function LessonEditor({
   };
 
   return (
-    <div className="bg-white border rounded p-3 space-y-3">
+    <div className="bg-card border rounded p-3 space-y-3">
       {/* WYSIWYG Editor */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-1">Сабақ мазмұны</h4>
+        <h4 className="text-sm font-semibold text-foreground mb-1">Сабақ мазмұны</h4>
         <ReactQuill
+          ref={quillRef}
           theme="snow"
           value={content}
           onChange={setContent}
           modules={quillModules}
           placeholder="Сабақ мазмұнын жазыңыз..."
-          className="bg-white [&_.ql-editor]:min-h-[150px]"
+          className="bg-card [&_.ql-editor]:min-h-[150px]"
         />
       </div>
 
       {/* Video URL */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-foreground mb-1">
           Видео сілтемесі (міндетті емес)
         </label>
         <input
@@ -321,18 +367,18 @@ function LessonEditor({
       </div>
 
       {/* Image Upload */}
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-        <h4 className="text-sm font-semibold text-gray-700 mb-2">Сабақ суреттері</h4>
+      <div className="border-2 border-dashed border-border rounded-lg p-4">
+        <h4 className="text-sm font-semibold text-foreground mb-2">Сабақ суреттері</h4>
         {!lesson ? (
           <p className="text-xs text-amber-600">
             Алдымен сабақты сақтаңыз, содан кейін суреттерді жүктей аласыз
           </p>
         ) : (
           <>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               Сабаққа қатысты суреттерді жүктеңіз (PNG, JPG, WEBP)
             </p>
-            <label className={`inline-flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm transition ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+            <label className={`inline-flex items-center gap-2 cursor-pointer bg-secondary hover:bg-muted text-foreground px-4 py-2 rounded-lg text-sm transition ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -365,7 +411,7 @@ function LessonEditor({
                       &times;
                     </button>
                     {img.caption && (
-                      <p className="text-xs text-gray-600 p-1 truncate">{img.caption}</p>
+                      <p className="text-xs text-muted-foreground p-1 truncate">{img.caption}</p>
                     )}
                   </div>
                 ))}
@@ -483,7 +529,7 @@ export default function ContentManagerPage() {
     }
   };
 
-  if (loading) return <p className="text-gray-600">Жүктелуде...</p>;
+  if (loading) return <p className="text-muted-foreground">Жүктелуде...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
   const sectionTopics = (sectionId: number) => topics.filter((t) => t.section === sectionId).sort((a, b) => a.order - b.order);
@@ -492,7 +538,7 @@ export default function ContentManagerPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Контент басқару</h1>
+        <h1 className="text-2xl font-bold text-foreground">Контент басқару</h1>
         <button
           onClick={() => {
             setEditingSection(null);
@@ -518,27 +564,27 @@ export default function ContentManagerPage() {
 
       {/* Sections Table */}
       {sections.length === 0 ? (
-        <p className="text-gray-500">Бөлімдер жоқ. Жаңа бөлім қосыңыз.</p>
+        <p className="text-muted-foreground">Бөлімдер жоқ. Жаңа бөлім қосыңыз.</p>
       ) : (
         <div className="space-y-3">
           {sections
             .sort((a, b) => a.order - b.order)
             .map((section) => (
-              <div key={section.id} className="bg-white rounded-lg shadow">
+              <div key={section.id} className="bg-card rounded-lg shadow">
                 {/* Section row */}
                 <div className="flex items-center justify-between px-5 py-4">
                   <button
                     className="flex-1 text-left"
                     onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
                   >
-                    <span className="font-semibold text-gray-800">{section.title}</span>
-                    <span className="text-sm text-gray-500 ml-3">{section.description}</span>
+                    <span className="font-semibold text-foreground">{section.title}</span>
+                    <span className="text-sm text-muted-foreground ml-3">{section.description}</span>
                   </button>
                   <div className="flex items-center gap-3 ml-4">
-                    <span className="text-xs text-gray-400">#{section.order}</span>
+                    <span className="text-xs text-muted-foreground">#{section.order}</span>
                     <span
                       className={`text-xs px-2 py-0.5 rounded ${
-                        section.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                        section.is_published ? 'bg-green-100 text-green-700' : 'bg-secondary text-muted-foreground'
                       }`}
                     >
                       {section.is_published ? 'Жарияланған' : 'Жарияланбаған'}
@@ -563,9 +609,9 @@ export default function ContentManagerPage() {
 
                 {/* Expanded: Topics */}
                 {expandedSection === section.id && (
-                  <div className="border-t px-5 py-4 bg-gray-50 space-y-3">
+                  <div className="border-t px-5 py-4 bg-secondary space-y-3">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-semibold text-gray-700">Тақырыптар</h3>
+                      <h3 className="text-sm font-semibold text-foreground">Тақырыптар</h3>
                       <button
                         onClick={() => {
                           setEditingTopic(null);
@@ -590,22 +636,22 @@ export default function ContentManagerPage() {
                     )}
 
                     {sectionTopics(section.id).length === 0 ? (
-                      <p className="text-sm text-gray-400">Тақырыптар жоқ</p>
+                      <p className="text-sm text-muted-foreground">Тақырыптар жоқ</p>
                     ) : (
                       sectionTopics(section.id).map((topic) => (
                         <div key={topic.id}>
-                          <div className="flex items-center justify-between bg-white border rounded px-3 py-2">
+                          <div className="flex items-center justify-between bg-card border rounded px-3 py-2">
                             <button
-                              className="flex-1 text-left text-sm text-gray-800"
+                              className="flex-1 text-left text-sm text-foreground"
                               onClick={() => setActiveTopic(activeTopic === topic.id ? null : topic.id)}
                             >
                               {topic.title}
                             </button>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-gray-400">#{topic.order}</span>
+                              <span className="text-xs text-muted-foreground">#{topic.order}</span>
                               <span
                                 className={`text-xs px-1.5 py-0.5 rounded ${
-                                  topic.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                  topic.is_published ? 'bg-green-100 text-green-700' : 'bg-secondary text-muted-foreground'
                                 }`}
                               >
                                 {topic.is_published ? 'Жар.' : 'Жоқ'}

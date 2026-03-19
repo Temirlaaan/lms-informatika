@@ -39,7 +39,7 @@ export default function SectionDetailPage() {
   if (error) return <p className="text-red-600">{error}</p>;
 
   if (!section) {
-    return <p className="text-gray-500">Бөлім табылмады</p>;
+    return <p className="text-muted-foreground">Бөлім табылмады</p>;
   }
 
   const completed = section.topics.filter((t) => t.is_completed).length;
@@ -50,20 +50,20 @@ export default function SectionDetailPage() {
         ← Бөлімдерге оралу
       </Link>
 
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-6 mb-6">
         <div className="flex items-center gap-3 mb-2">
           <span className="text-3xl">{section.icon || '📘'}</span>
-          <h1 className="text-2xl font-bold text-gray-800">{section.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{section.title}</h1>
         </div>
-        <p className="text-gray-600 mb-4">{section.description}</p>
+        <p className="text-muted-foreground mb-4">{section.description}</p>
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-xs">
+          <div className="flex-1 bg-secondary rounded-full h-2 max-w-xs">
             <div
               className="bg-accent h-2 rounded-full transition-all"
               style={{ width: `${section.topics.length > 0 ? Math.round((completed / section.topics.length) * 100) : 0}%` }}
             />
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             {completed} / {section.topics.length} аяқталды
           </span>
         </div>
@@ -74,17 +74,17 @@ export default function SectionDetailPage() {
           <Link
             key={topic.id}
             to={`/student/topics/${topic.id}`}
-            className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4 flex items-center justify-between"
+            className="bg-card rounded-lg shadow-sm hover:shadow-md transition p-4 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
               <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                 topic.is_completed
                   ? 'bg-accent text-white'
-                  : 'bg-gray-200 text-gray-500'
+                  : 'bg-secondary text-muted-foreground'
               }`}>
                 {topic.is_completed ? '✓' : topic.order}
               </span>
-              <span className="font-medium text-gray-800">{topic.title}</span>
+              <span className="font-medium text-foreground">{topic.title}</span>
             </div>
             <div className="flex items-center gap-2">
               {topic.has_quiz && (

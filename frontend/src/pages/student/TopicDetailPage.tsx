@@ -65,7 +65,7 @@ export default function TopicDetailPage() {
   if (error) return <p className="text-red-600">{error}</p>;
 
   if (!topic) {
-    return <p className="text-gray-500">Тақырып табылмады</p>;
+    return <p className="text-muted-foreground">Тақырып табылмады</p>;
   }
 
   return (
@@ -77,9 +77,9 @@ export default function TopicDetailPage() {
         &larr; Бөлімге оралу
       </Link>
 
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">{topic.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{topic.title}</h1>
           {topic.is_completed && (
             <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-medium">
               Аяқталды ✓
@@ -114,7 +114,7 @@ export default function TopicDetailPage() {
               <figure key={img.id}>
                 <img src={img.image} alt={img.caption} className="rounded-lg max-w-full" />
                 {img.caption && (
-                  <figcaption className="text-sm text-gray-500 mt-1">{img.caption}</figcaption>
+                  <figcaption className="text-sm text-muted-foreground mt-1">{img.caption}</figcaption>
                 )}
               </figure>
             ))}

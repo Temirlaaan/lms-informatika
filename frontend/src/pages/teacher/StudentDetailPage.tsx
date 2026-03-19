@@ -26,7 +26,7 @@ function gradeColor(grade: number): string {
     case 2:
       return 'bg-red-100 text-red-800';
     default:
-      return 'bg-gray-100 text-gray-600';
+      return 'bg-gray-100 text-muted-foreground';
   }
 }
 
@@ -52,9 +52,9 @@ export default function StudentDetailPage() {
     fetchData();
   }, [id]);
 
-  if (loading) return <p className="text-gray-600">Жүктелуде...</p>;
+  if (loading) return <p className="text-muted-foreground">Жүктелуде...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
-  if (!student) return <p className="text-gray-500">Оқушы табылмады</p>;
+  if (!student) return <p className="text-muted-foreground">Оқушы табылмады</p>;
 
   return (
     <div>
@@ -65,31 +65,31 @@ export default function StudentDetailPage() {
         &larr; Журналға оралу
       </button>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">{student.student_name}</h1>
+      <div className="bg-card rounded-lg shadow p-6 mb-6">
+        <h1 className="text-2xl font-bold text-foreground mb-1">{student.student_name}</h1>
         {student.grade_class && (
-          <p className="text-gray-500">Сынып: {student.grade_class}</p>
+          <p className="text-muted-foreground">Сынып: {student.grade_class}</p>
         )}
       </div>
 
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Бөлімдер бойынша бағалар</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-3">Бөлімдер бойынша бағалар</h2>
 
       {student.grades.length === 0 ? (
-        <p className="text-gray-500">Бағалар жоқ</p>
+        <p className="text-muted-foreground">Бағалар жоқ</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-card rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-secondary">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Бөлім</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Баға</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Балл</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Бөлім</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase">Баға</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase">Балл</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {student.grades.map((g, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{g.section_name}</td>
+                <tr key={idx} className="hover:bg-secondary">
+                  <td className="px-6 py-4 text-sm font-medium text-foreground">{g.section_name}</td>
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`w-8 h-8 rounded-full inline-flex items-center justify-center text-sm font-bold ${gradeColor(g.grade_value)}`}
@@ -97,7 +97,7 @@ export default function StudentDetailPage() {
                       {g.grade_value}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-700">{g.score.toFixed(1)}%</td>
+                  <td className="px-6 py-4 text-center text-sm text-foreground">{g.score.toFixed(1)}%</td>
                 </tr>
               ))}
             </tbody>

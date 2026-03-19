@@ -49,18 +49,18 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Басты бет</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl font-bold text-foreground">Басты бет</h1>
+        <p className="text-muted-foreground mt-1">
           Қош келдіңіз, {user?.full_name || user?.username}!
         </p>
       </div>
 
       {/* Overall progress */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Жалпы прогресс</h2>
+      <div className="bg-card rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Жалпы прогресс</h2>
         <div className="flex items-center gap-4">
           <div
-            className="flex-1 bg-gray-200 rounded-full h-4"
+            className="flex-1 bg-secondary rounded-full h-4"
             role="progressbar"
             aria-valuenow={overallPercent}
             aria-valuemin={0}
@@ -71,35 +71,35 @@ export default function StudentDashboard() {
               style={{ width: `${overallPercent}%` }}
             />
           </div>
-          <span className="text-sm font-medium text-gray-600">{overallPercent}%</span>
+          <span className="text-sm font-medium text-muted-foreground">{overallPercent}%</span>
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           {completedTopics} / {totalTopics} тақырып аяқталды
         </p>
       </div>
 
       {/* Section progress */}
-      <div className="bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-card rounded-xl shadow-sm p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">Бөлімдер</h2>
+          <h2 className="text-lg font-semibold text-foreground">Бөлімдер</h2>
           <Link to="/student/sections" className="text-primary text-sm hover:underline">
             Барлығын көру
           </Link>
         </div>
         {progress.length === 0 ? (
-          <p className="text-gray-400 text-sm">Бөлімдер әлі жоқ</p>
+          <p className="text-muted-foreground text-sm">Бөлімдер әлі жоқ</p>
         ) : (
           <div className="space-y-3">
             {progress.map((p) => (
               <div key={p.section_id} className="flex items-center gap-3">
-                <span className="text-sm text-gray-700 w-48 truncate">{p.section_title}</span>
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
+                <span className="text-sm text-foreground w-48 truncate">{p.section_title}</span>
+                <div className="flex-1 bg-secondary rounded-full h-2">
                   <div
                     className="bg-primary h-2 rounded-full transition-all"
                     style={{ width: `${p.percentage}%` }}
                   />
                 </div>
-                <span className="text-xs text-gray-500 w-10 text-right">{p.percentage}%</span>
+                <span className="text-xs text-muted-foreground w-10 text-right">{p.percentage}%</span>
               </div>
             ))}
           </div>
@@ -108,17 +108,17 @@ export default function StudentDashboard() {
 
       {/* Recent grades */}
       {grades.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-card rounded-xl shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Бағалар</h2>
+            <h2 className="text-lg font-semibold text-foreground">Бағалар</h2>
             <Link to="/student/grades" className="text-primary text-sm hover:underline">
               Журналды көру
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {grades.map((g) => (
-              <div key={g.id} className="text-center p-3 rounded-lg bg-gray-50">
-                <p className="text-xs text-gray-500 truncate">{g.section_title}</p>
+              <div key={g.id} className="text-center p-3 rounded-lg bg-secondary">
+                <p className="text-xs text-muted-foreground truncate">{g.section_title}</p>
                 <p className={`text-2xl font-bold mt-1 ${
                   g.grade_value === 5 ? 'text-green-600' :
                   g.grade_value === 4 ? 'text-blue-600' :

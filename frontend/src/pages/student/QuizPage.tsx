@@ -122,22 +122,25 @@ export default function QuizPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topicId]);
 
+  const timerActive = timeLeft > 0 && attemptId !== null;
+
   useEffect(() => {
-    if (timeLeft > 0 && attemptId) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+    if (!timerActive) return;
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [attemptId, timeLeft > 0]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [timerActive]);
 
   const selectChoice = (questionId: number, choiceId: number, type: string) => {
     setAnswers((prev) => {
@@ -178,7 +181,7 @@ export default function QuizPage() {
   if (error === 'Әрекет лимитіне жеттіңіз') {
     return (
       <div className="max-w-2xl mx-auto text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">{quiz.title}</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-4">{quiz.title}</h1>
         <p className="text-red-500 text-lg mb-4">Әрекет лимитіне жеттіңіз ({quiz.max_attempts}/{quiz.max_attempts})</p>
         <button onClick={() => navigate(-1)} className="text-primary hover:underline">&larr; Артқа</button>
       </div>
@@ -188,8 +191,8 @@ export default function QuizPage() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header with timer */}
-      <div className="sticky top-0 bg-white shadow-sm rounded-lg p-4 mb-6 flex justify-between items-center z-10">
-        <h1 className="text-lg font-bold text-gray-800">{quiz.title}</h1>
+      <div className="sticky top-0 bg-card shadow-sm rounded-lg p-4 mb-6 flex justify-between items-center z-10">
+        <h1 className="text-lg font-bold text-foreground">{quiz.title}</h1>
         <div className={`text-lg font-mono font-bold ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
           {formatTime(timeLeft)}
         </div>
@@ -198,13 +201,13 @@ export default function QuizPage() {
       {/* Questions */}
       <div className="space-y-6">
         {quiz.questions.map((q, idx) => (
-          <div key={q.id} className="bg-white rounded-xl shadow-sm p-6">
+          <div key={q.id} className="bg-card rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="font-medium text-gray-800">
+              <h3 className="font-medium text-foreground">
                 <span className="text-primary font-bold mr-2">{idx + 1}.</span>
                 {q.text}
               </h3>
-              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">
+              <span className="text-xs bg-secondary text-muted-foreground px-2 py-1 rounded">
                 {q.points} ұпай
               </span>
             </div>
@@ -216,7 +219,7 @@ export default function QuizPage() {
                   <label
                     key={c.id}
                     className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer border transition ${
-                      selected ? 'border-primary bg-primary/5' : 'border-gray-200 hover:bg-gray-50'
+                      selected ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary'
                     }`}
                   >
                     <input
@@ -226,7 +229,7 @@ export default function QuizPage() {
                       onChange={() => selectChoice(q.id, c.id, q.question_type)}
                       className="text-primary"
                     />
-                    <span className="text-gray-700">{c.text}</span>
+                    <span className="text-foreground">{c.text}</span>
                   </label>
                 );
               })}

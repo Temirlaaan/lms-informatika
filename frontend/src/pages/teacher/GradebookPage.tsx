@@ -29,7 +29,7 @@ function gradeColor(grade: number): string {
     case 2:
       return 'bg-red-100 text-red-800';
     default:
-      return 'bg-gray-100 text-gray-600';
+      return 'bg-gray-100 text-muted-foreground';
   }
 }
 
@@ -53,35 +53,35 @@ export default function GradebookPage() {
     fetchGradebook();
   }, []);
 
-  if (loading) return <p className="text-gray-600">Жүктелуде...</p>;
+  if (loading) return <p className="text-muted-foreground">Жүктелуде...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
-  if (!data) return <p className="text-gray-500">Деректер жоқ</p>;
+  if (!data) return <p className="text-muted-foreground">Деректер жоқ</p>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Бағалар журналы</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-4">Бағалар журналы</h1>
 
       {data.students.length === 0 ? (
-        <p className="text-gray-500">Оқушылар жоқ</p>
+        <p className="text-muted-foreground">Оқушылар жоқ</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-card rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-secondary">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-10">
+                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase sticky left-0 bg-secondary z-10">
                   Оқушы
                 </th>
                 {data.sections.map((sec) => (
-                  <th key={sec} className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                  <th key={sec} className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                     {sec}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {data.students.map((student) => (
-                <tr key={student.student_id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium sticky left-0 bg-white z-10">
+                <tr key={student.student_id} className="hover:bg-secondary">
+                  <td className="px-4 py-3 text-sm font-medium sticky left-0 bg-card z-10">
                     <button
                       onClick={() => navigate(`/teacher/students/${student.student_id}`)}
                       className="text-indigo-600 hover:text-indigo-800 hover:underline"
@@ -100,10 +100,10 @@ export default function GradebookPage() {
                             >
                               {entry.grade_value}
                             </span>
-                            <span className="text-xs text-gray-400">{entry.score.toFixed(0)}%</span>
+                            <span className="text-xs text-muted-foreground">{entry.score.toFixed(0)}%</span>
                           </div>
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-muted-foreground">—</span>
                         )}
                       </td>
                     );

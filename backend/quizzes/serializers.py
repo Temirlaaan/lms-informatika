@@ -73,6 +73,7 @@ class StudentAnswerResultSerializer(serializers.ModelSerializer):
 class QuizAttemptDetailSerializer(serializers.ModelSerializer):
     answers = StudentAnswerResultSerializer(many=True, read_only=True)
     quiz_title = serializers.CharField(source='quiz.title', read_only=True)
+    grade_value = serializers.SerializerMethodField()
 
     class Meta:
         model = QuizAttempt
@@ -80,7 +81,12 @@ class QuizAttemptDetailSerializer(serializers.ModelSerializer):
             'id', 'quiz', 'quiz_title', 'score',
             'total_points', 'earned_points',
             'started_at', 'finished_at', 'is_completed', 'answers',
+            'grade_value',
         ]
+
+    def get_grade_value(self, obj):
+        from grades.models import Grade
+        return Grade.calculate_grade(obj.score)
 
 
 class TeacherChoiceSerializer(serializers.ModelSerializer):

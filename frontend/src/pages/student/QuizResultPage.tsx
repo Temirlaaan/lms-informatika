@@ -31,14 +31,8 @@ interface AttemptResult {
   score: number;
   total_points: number;
   earned_points: number;
+  grade_value: number;
   answers: AnswerResult[];
-}
-
-function gradeFromScore(score: number): number {
-  if (score >= 85) return 5;
-  if (score >= 70) return 4;
-  if (score >= 50) return 3;
-  return 2;
 }
 
 export default function QuizResultPage() {
@@ -83,7 +77,7 @@ export default function QuizResultPage() {
 
   if (!result) return null;
 
-  const grade = gradeFromScore(result.score);
+  const grade = result.grade_value;
   const gradeColor =
     grade === 5 ? 'text-green-600' :
     grade === 4 ? 'text-blue-600' :
@@ -92,34 +86,34 @@ export default function QuizResultPage() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Summary */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">{result.quiz_title}</h1>
-        <p className="text-gray-500 mb-4">Тест нәтижесі</p>
+      <div className="bg-card rounded-xl shadow-sm p-6 mb-6 text-center">
+        <h1 className="text-2xl font-bold text-foreground mb-2">{result.quiz_title}</h1>
+        <p className="text-muted-foreground mb-4">Тест нәтижесі</p>
         <div className="flex justify-center gap-8">
           <div>
             <p className="text-4xl font-bold text-primary">{result.score}%</p>
-            <p className="text-sm text-gray-500">Нәтиже</p>
+            <p className="text-sm text-muted-foreground">Нәтиже</p>
           </div>
           <div>
             <p className={`text-4xl font-bold ${gradeColor}`}>{grade}</p>
-            <p className="text-sm text-gray-500">Баға</p>
+            <p className="text-sm text-muted-foreground">Баға</p>
           </div>
           <div>
-            <p className="text-4xl font-bold text-gray-700">{result.earned_points}/{result.total_points}</p>
-            <p className="text-sm text-gray-500">Ұпай</p>
+            <p className="text-4xl font-bold text-foreground">{result.earned_points}/{result.total_points}</p>
+            <p className="text-sm text-muted-foreground">Ұпай</p>
           </div>
         </div>
       </div>
 
       {/* Answers breakdown */}
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Жауаптар</h2>
+      <h2 className="text-lg font-semibold text-foreground mb-4">Жауаптар</h2>
       <div className="space-y-4">
         {result.answers.map((a, idx) => (
-          <div key={a.id} className={`bg-white rounded-xl shadow-sm p-5 border-l-4 ${
+          <div key={a.id} className={`bg-card rounded-xl shadow-sm p-5 border-l-4 ${
             a.is_correct ? 'border-green-500' : 'border-red-500'
           }`}>
             <div className="flex justify-between items-start mb-3">
-              <h3 className="font-medium text-gray-800">
+              <h3 className="font-medium text-foreground">
                 <span className="mr-2">{idx + 1}.</span>
                 {a.question.text}
               </h3>
