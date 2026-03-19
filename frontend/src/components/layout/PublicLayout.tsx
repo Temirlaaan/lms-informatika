@@ -14,7 +14,7 @@ export default function PublicLayout() {
             <Link to="/" className="text-xl font-bold text-primary">
               LMS Информатика
             </Link>
-            <nav className="flex items-center gap-2">
+            <nav className="flex items-center gap-2" aria-label="Басты навигация">
               <ThemeToggle />
               {user ? (
                 <Button asChild>

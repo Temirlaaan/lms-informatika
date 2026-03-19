@@ -24,8 +24,18 @@ export default function TeacherLayout() {
       if (e.key === 'Escape') setSidebarOpen(false);
     };
     document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
-  }, []);
+
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
 
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/');

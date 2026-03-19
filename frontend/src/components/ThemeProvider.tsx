@@ -21,24 +21,34 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove("light", "dark")
+
+    const applyTheme = () => {
+      root.classList.remove("light", "dark")
+      if (theme === "system") {
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+          .matches
+          ? "dark"
+          : "light"
+        root.classList.add(systemTheme)
+      } else {
+        root.classList.add(theme)
+      }
+    }
+
+    applyTheme()
 
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-      root.classList.add(systemTheme)
-    } else {
-      root.classList.add(theme)
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+      mediaQuery.addEventListener("change", applyTheme)
+      return () => mediaQuery.removeEventListener("change", applyTheme)
     }
   }, [theme])
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(STORAGE_KEY, theme)
-      setTheme(theme)
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(STORAGE_KEY, newTheme)
+      setTheme(newTheme)
     },
   }
 
