@@ -71,7 +71,7 @@ export default function TeacherLayout() {
               <div className="mt-3">
                 <Link to="/teacher/profile" className="flex items-center gap-3 hover:text-primary transition" onClick={() => setSidebarOpen(false)}>
                   {user?.avatar ? (
-                    <img src={user.avatar} alt={user?.full_name || user?.username || 'Аватар'} className="w-9 h-9 rounded-full object-cover" />
+                    <img src={`${user.avatar}${user.avatar.includes('?') ? '&' : '?'}_=${Date.now()}`} alt={user?.full_name || user?.username || 'Аватар'} className="w-9 h-9 rounded-full object-cover" />
                   ) : (
                     <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
                       {(user?.full_name || user?.username || '?').charAt(0).toUpperCase()}

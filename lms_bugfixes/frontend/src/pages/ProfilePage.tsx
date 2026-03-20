@@ -29,14 +29,16 @@ export default function ProfilePage() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // Only on unmount — don't revoke on every avatarPreview change
 
   const handleAvatarSelect = (file: File) => {
+    // Validate file size before preview
     if (file.size > 5 * 1024 * 1024) {
       showToast('Файл өте үлкен (макс. 5МБ)', 'error');
       return;
     }
 
+    // Revoke previous preview blob
     if (avatarPreview && avatarPreview.startsWith('blob:')) {
       URL.revokeObjectURL(avatarPreview);
     }
@@ -67,6 +69,7 @@ export default function ProfilePage() {
       setAvatarPreview(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
 
+      // Refresh user data to get the new avatar URL
       await refreshUser();
 
       showToast('Профиль сәтті сақталды', 'success');
@@ -85,6 +88,7 @@ export default function ProfilePage() {
   const getDisplayAvatar = (): string | null => {
     if (avatarPreview) return avatarPreview;
     if (user.avatar) {
+      // Add cache bust param to force browser to reload after upload
       const separator = user.avatar.includes('?') ? '&' : '?';
       return `${user.avatar}${separator}_=${Date.now()}`;
     }
@@ -110,6 +114,7 @@ export default function ProfilePage() {
                 alt="Аватар"
                 className="w-24 h-24 rounded-full object-cover border-2 border-border"
                 onError={(e) => {
+                  // If avatar fails to load, hide it and show initials instead
                   (e.target as HTMLImageElement).style.display = 'none';
                   const fallback = (e.target as HTMLImageElement).nextElementSibling;
                   if (fallback) (fallback as HTMLElement).style.display = 'flex';

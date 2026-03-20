@@ -6,22 +6,6 @@ import { getTopic, completeTopic } from '../../api/courses';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
 import ImageLightbox from '../../components/common/ImageLightbox';
 
-// Configure DOMPurify to allow iframe (for YouTube embeds) and common HTML
-const DOMPURIFY_CONFIG = {
-  ADD_TAGS: ['iframe'],
-  ADD_ATTR: [
-    'allow',
-    'allowfullscreen',
-    'frameborder',
-    'scrolling',
-    'src',
-    'width',
-    'height',
-    'target',
-    'rel',
-  ],
-};
-
 interface LessonImage {
   id: number;
   image: string;
@@ -51,6 +35,22 @@ interface TopicDetail {
   prev_topic_id: number | null;
   next_topic_id: number | null;
 }
+
+// Configure DOMPurify to allow iframe (for YouTube embeds) and common HTML
+const DOMPURIFY_CONFIG = {
+  ADD_TAGS: ['iframe'],
+  ADD_ATTR: [
+    'allow',
+    'allowfullscreen',
+    'frameborder',
+    'scrolling',
+    'src',
+    'width',
+    'height',
+    'target',
+    'rel',
+  ],
+};
 
 export default function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -116,11 +116,11 @@ export default function TopicDetailPage() {
           )}
         </div>
 
-        {/* Video */}
+        {/* Video — FIX: use `url` prop instead of `src` */}
         {videoSource?.url && (
           <div className="aspect-video mb-6 rounded-lg overflow-hidden bg-black">
             <ReactPlayer
-              src={videoSource.url}
+              url={videoSource.url}
               controls
               width="100%"
               height="100%"
@@ -128,7 +128,7 @@ export default function TopicDetailPage() {
           </div>
         )}
 
-        {/* Content — sanitized to prevent XSS */}
+        {/* Content — sanitized with iframe support, using lesson-content class for styling */}
         {topic.lesson?.content && (
           <div
             className="lesson-content max-w-none mb-6 [&_img]:cursor-pointer [&_img]:transition [&_img:hover]:opacity-80"

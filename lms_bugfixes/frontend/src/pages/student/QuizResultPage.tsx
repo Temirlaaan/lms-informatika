@@ -46,13 +46,11 @@ export default function QuizResultPage() {
 
   useEffect(() => {
     if (stateAttemptId) {
-      // Came from quiz submission — use the attempt ID directly
       getAttemptDetail(stateAttemptId)
         .then((r) => setResult(r.data))
         .catch(() => navigate('/student/sections'))
         .finally(() => setLoading(false));
     } else {
-      // Page refresh — find the latest completed attempt strictly for THIS topic's quiz
       getQuizByTopic(Number(topicId))
         .then((quizRes) => {
           const quizId = quizRes.data.id;
@@ -125,6 +123,7 @@ export default function QuizResultPage() {
               {a.question.choices.map((c) => {
                 const wasSelected = a.selected_choice_ids.includes(c.id);
                 let bg = '';
+                // FIX: dark mode compatible colors
                 if (c.is_correct) bg = 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300';
                 else if (wasSelected && !c.is_correct) bg = 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300';
                 return (
@@ -133,7 +132,7 @@ export default function QuizResultPage() {
                       {c.is_correct ? '✓' : wasSelected ? '✗' : '○'}
                     </span>
                     <span>{c.text}</span>
-                    {wasSelected && <span className="text-xs ml-auto">(Сіздің жауабыңыз)</span>}
+                    {wasSelected && <span className="text-xs ml-auto opacity-70">(Сіздің жауабыңыз)</span>}
                   </div>
                 );
               })}
