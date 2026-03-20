@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { FileText } from 'lucide-react';
 import { getSection } from '../../api/courses';
+import Breadcrumbs from '../../components/common/Breadcrumbs';
 
 interface TopicItem {
   id: number;
@@ -8,6 +10,7 @@ interface TopicItem {
   order: number;
   is_completed: boolean;
   has_quiz: boolean;
+  status: 'completed' | 'in_progress' | 'not_started';
 }
 
 interface SectionDetail {
@@ -17,6 +20,12 @@ interface SectionDetail {
   icon: string;
   topics: TopicItem[];
 }
+
+const statusConfig = {
+  completed: { label: 'Аяқталды', bg: 'bg-accent/10 text-accent', icon: '✓' },
+  in_progress: { label: 'Оқылуда', bg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400', icon: '▶' },
+  not_started: { label: '', bg: 'bg-secondary text-muted-foreground', icon: '' },
+};
 
 export default function SectionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,9 +55,12 @@ export default function SectionDetailPage() {
 
   return (
     <div>
-      <Link to="/student/sections" className="text-primary text-sm hover:underline mb-4 inline-block">
-        ← Бөлімдерге оралу
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Бөлімдер', to: '/student' },
+          { label: section.title },
+        ]}
+      />
 
       <div className="bg-card rounded-xl shadow-sm p-6 mb-6">
         <div className="flex items-center gap-3 mb-2">
@@ -69,34 +81,47 @@ export default function SectionDetailPage() {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {section.topics.map((topic) => (
-          <Link
-            key={topic.id}
-            to={`/student/topics/${topic.id}`}
-            className="bg-card rounded-lg shadow-sm hover:shadow-md transition p-4 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                topic.is_completed
-                  ? 'bg-accent text-white'
-                  : 'bg-secondary text-muted-foreground'
-              }`}>
-                {topic.is_completed ? '✓' : topic.order}
-              </span>
-              <span className="font-medium text-foreground">{topic.title}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {topic.has_quiz && (
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Тест бар</span>
-              )}
-              {topic.is_completed && (
-                <span className="text-xs text-accent font-medium">Аяқталды</span>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
+      {section.topics.length === 0 ? (
+        <div className="bg-card rounded-xl shadow-sm p-12 text-center">
+          <FileText className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">Тақырыптар әлі жоқ</h3>
+          <p className="text-muted-foreground">Бұл бөлімге тақырыптар қосылғанда осында көрінеді</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {section.topics.map((topic) => {
+            const cfg = statusConfig[topic.status ?? (topic.is_completed ? 'completed' : 'not_started')];
+            return (
+              <Link
+                key={topic.id}
+                to={`/student/topics/${topic.id}`}
+                className="bg-card rounded-lg shadow-sm hover:shadow-md transition p-4 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                    topic.is_completed
+                      ? 'bg-accent text-white'
+                      : topic.status === 'in_progress'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-secondary text-muted-foreground'
+                  }`}>
+                    {cfg.icon || topic.order}
+                  </span>
+                  <span className="font-medium text-foreground">{topic.title}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {topic.has_quiz && (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Тест бар</span>
+                  )}
+                  {cfg.label && (
+                    <span className={`text-xs px-2 py-1 rounded ${cfg.bg}`}>{cfg.label}</span>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

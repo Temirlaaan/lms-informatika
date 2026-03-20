@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
-import type { Section, Topic, Lesson, LessonImage } from '../../types';
+import type { Section, Topic, Lesson, LessonImage, VideoSource } from '../../types';
 import {
   getTeacherSections,
   createSection,
@@ -196,6 +196,11 @@ function LessonEditor({
 }) {
   const [content, setContent] = useState(lesson?.content ?? '');
   const [videoUrl, setVideoUrl] = useState(lesson?.video_url ?? '');
+  const [videoMode, setVideoMode] = useState<'youtube' | 'file'>(
+    lesson?.video_source?.type === 'file' ? 'file' : 'youtube'
+  );
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [existingVideoSource, setExistingVideoSource] = useState<VideoSource | null>(lesson?.video_source ?? null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<LessonImage[]>(lesson?.images ?? []);
@@ -204,6 +209,9 @@ function LessonEditor({
   useEffect(() => {
     setContent(lesson?.content ?? '');
     setVideoUrl(lesson?.video_url ?? '');
+    setVideoMode(lesson?.video_source?.type === 'file' ? 'file' : 'youtube');
+    setVideoFile(null);
+    setExistingVideoSource(lesson?.video_source ?? null);
     setImages(lesson?.images ?? []);
   }, [lesson]);
 
@@ -214,7 +222,7 @@ function LessonEditor({
     }
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
+    input.setAttribute('accept', 'image/png,image/jpeg,image/webp,image/gif');
     input.click();
     input.onchange = async () => {
       const file = input.files?.[0];
@@ -256,18 +264,27 @@ function LessonEditor({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const trimmedUrl = videoUrl.trim();
-      const processedUrl = trimmedUrl ? (toYouTubeEmbedUrl(trimmedUrl) || trimmedUrl) : null;
+      const formData = new FormData();
+      formData.append('content', content);
 
-      const payload: { content: string; video_url?: string | null; topic?: number } = {
-        content,
-        video_url: processedUrl,
-      };
+      if (videoMode === 'youtube') {
+        const trimmedUrl = videoUrl.trim();
+        const processedUrl = trimmedUrl ? (toYouTubeEmbedUrl(trimmedUrl) || trimmedUrl) : '';
+        formData.append('video_url', processedUrl);
+        // Clear video file when switching to youtube
+        formData.append('video_file', '');
+      } else {
+        formData.append('video_url', '');
+        if (videoFile) {
+          formData.append('video_file', videoFile);
+        }
+      }
 
       if (lesson) {
-        await updateLesson(lesson.id, payload);
+        await updateLesson(lesson.id, formData);
       } else {
-        await createLesson({ topic: topicId, content, video_url: processedUrl ?? undefined });
+        formData.append('topic', String(topicId));
+        await createLesson(formData);
       }
       onSaved();
     } catch {
@@ -343,26 +360,71 @@ function LessonEditor({
         />
       </div>
 
-      {/* Video URL */}
+      {/* Video */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">
-          Видео сілтемесі (міндетті емес)
+          Видео (міндетті емес)
         </label>
-        <input
-          className="w-full border rounded px-3 py-2 text-sm"
-          value={videoUrl}
-          onChange={(e) => setVideoUrl(e.target.value)}
-          placeholder="https://www.youtube.com/watch?v=... немесе https://youtu.be/..."
-        />
-        {videoUrl.trim() && toYouTubeEmbedUrl(videoUrl) && (
-          <p className="text-xs text-green-600 mt-1">
-            YouTube сілтемесі анықталды — автоматты түрде embed форматына ауыстырылады
-          </p>
-        )}
-        {videoUrl.trim() && !toYouTubeEmbedUrl(videoUrl) && (
-          <p className="text-xs text-amber-600 mt-1">
-            YouTube сілтемесі танылмады — URL сол қалпында сақталады
-          </p>
+        <div className="flex gap-2 mb-2">
+          <button
+            type="button"
+            onClick={() => setVideoMode('youtube')}
+            className={`px-3 py-1.5 rounded text-sm ${
+              videoMode === 'youtube'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-secondary text-foreground hover:bg-muted'
+            }`}
+          >
+            YouTube сілтемесі
+          </button>
+          <button
+            type="button"
+            onClick={() => setVideoMode('file')}
+            className={`px-3 py-1.5 rounded text-sm ${
+              videoMode === 'file'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-secondary text-foreground hover:bg-muted'
+            }`}
+          >
+            Видео файл
+          </button>
+        </div>
+        {videoMode === 'youtube' ? (
+          <>
+            <input
+              className="w-full border rounded px-3 py-2 text-sm"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://www.youtube.com/watch?v=... немесе https://youtu.be/..."
+            />
+            {videoUrl.trim() && toYouTubeEmbedUrl(videoUrl) && (
+              <p className="text-xs text-green-600 mt-1">
+                YouTube сілтемесі анықталды — автоматты түрде embed форматына ауыстырылады
+              </p>
+            )}
+            {videoUrl.trim() && !toYouTubeEmbedUrl(videoUrl) && (
+              <p className="text-xs text-amber-600 mt-1">
+                YouTube сілтемесі танылмады — URL сол қалпында сақталады
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <input
+              type="file"
+              accept="video/mp4,video/webm,video/ogg"
+              className="w-full border rounded px-3 py-2 text-sm"
+              onChange={(e) => setVideoFile(e.target.files?.[0] ?? null)}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              MP4, WebM, OGG форматтары (макс. 100 МБ)
+            </p>
+            {existingVideoSource?.type === 'file' && !videoFile && (
+              <p className="text-xs text-green-600 mt-1">
+                Жүктелген видео бар
+              </p>
+            )}
+          </>
         )}
       </div>
 

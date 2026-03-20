@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Award } from 'lucide-react';
 import { getMyGrades } from '../../api/grades';
 
 interface GradeItem {
@@ -22,10 +24,10 @@ export default function GradesPage() {
   }, []);
 
   const gradeColor = (value: number) => {
-    if (value === 5) return 'text-green-600 bg-green-50';
-    if (value === 4) return 'text-blue-600 bg-blue-50';
-    if (value === 3) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (value === 5) return 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
+    if (value === 4) return 'text-blue-700 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30';
+    if (value === 3) return 'text-yellow-700 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
+    return 'text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
   };
 
   if (loading) {
@@ -38,8 +40,13 @@ export default function GradesPage() {
       <h1 className="text-2xl font-bold text-foreground mb-6">Бағалар журналы</h1>
 
       {grades.length === 0 ? (
-        <div className="bg-card rounded-xl shadow-sm p-8 text-center text-muted-foreground">
-          Бағалар әлі жоқ. Тест тапсырыңыз!
+        <div className="bg-card rounded-xl shadow-sm p-12 text-center">
+          <Award className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">Бағалар әлі жоқ</h3>
+          <p className="text-muted-foreground mb-4">Тест тапсырыңыз, нәтижелер осында көрінеді</p>
+          <Link to="/student" className="text-primary hover:underline">
+            Бөлімдерге өту
+          </Link>
         </div>
       ) : (
         <div className="bg-card rounded-xl shadow-sm overflow-hidden">

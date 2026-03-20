@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { getTopic, completeTopic } from '../../api/courses';
+import Breadcrumbs from '../../components/common/Breadcrumbs';
+import ImageLightbox from '../../components/common/ImageLightbox';
 
 interface LessonImage {
   id: number;
@@ -9,10 +11,16 @@ interface LessonImage {
   caption: string;
 }
 
+interface VideoSource {
+  type: 'youtube' | 'file';
+  url: string;
+}
+
 interface LessonData {
   id: number;
   content: string;
   video_url?: string;
+  video_source?: VideoSource | null;
   images: LessonImage[];
 }
 
@@ -23,23 +31,29 @@ interface TopicDetail {
   lesson: LessonData | null;
   is_completed: boolean;
   has_quiz: boolean;
+  prev_topic_id: number | null;
+  next_topic_id: number | null;
 }
 
 export default function TopicDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [topic, setTopic] = useState<TopicDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [error, setError] = useState('');
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
+      setLoading(true);
       getTopic(Number(id))
         .then((r) => setTopic(r.data))
         .catch(() => setError('Тақырыпты жүктеу кезінде қате орын алды'))
         .finally(() => setLoading(false));
     }
   }, [id]);
+
 
   const handleComplete = async () => {
     if (!topic) return;
@@ -68,33 +82,46 @@ export default function TopicDetailPage() {
     return <p className="text-muted-foreground">Тақырып табылмады</p>;
   }
 
+  const videoSource = topic.lesson?.video_source;
+
   return (
     <div className="max-w-4xl">
-      <Link
-        to={`/student/sections/${topic.section}`}
-        className="text-primary text-sm hover:underline mb-4 inline-block"
-      >
-        &larr; Бөлімге оралу
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Бөлімдер', to: '/student' },
+          { label: 'Бөлім', to: `/student/sections/${topic.section}` },
+          { label: topic.title },
+        ]}
+      />
 
       <div className="bg-card rounded-xl shadow-sm p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-foreground">{topic.title}</h1>
           {topic.is_completed && (
             <span className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-medium">
-              Аяқталды ✓
+              Аяқталды
             </span>
           )}
         </div>
 
         {/* Video */}
-        {topic.lesson?.video_url && getYouTubeId(topic.lesson.video_url) && (
+        {videoSource?.type === 'youtube' && getYouTubeId(videoSource.url) && (
           <div className="aspect-video mb-6 rounded-lg overflow-hidden bg-black">
             <iframe
               className="w-full h-full"
-              src={`https://www.youtube.com/embed/${getYouTubeId(topic.lesson.video_url!)}`}
+              src={`https://www.youtube.com/embed/${getYouTubeId(videoSource.url)}`}
               title={topic.title}
               allowFullScreen
+            />
+          </div>
+        )}
+        {videoSource?.type === 'file' && (
+          <div className="aspect-video mb-6 rounded-lg overflow-hidden bg-black">
+            <video
+              className="w-full h-full"
+              src={videoSource.url}
+              controls
+              controlsList="nodownload"
             />
           </div>
         )}
@@ -102,8 +129,14 @@ export default function TopicDetailPage() {
         {/* Content — sanitized to prevent XSS */}
         {topic.lesson?.content && (
           <div
-            className="prose max-w-none mb-6"
+            className="prose max-w-none mb-6 [&_img]:cursor-pointer [&_img]:transition [&_img:hover]:opacity-80"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(topic.lesson.content) }}
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (target.tagName === 'IMG') {
+                setLightboxSrc((target as HTMLImageElement).src);
+              }
+            }}
           />
         )}
 
@@ -112,7 +145,12 @@ export default function TopicDetailPage() {
           <div className="space-y-4 mb-6">
             {topic.lesson.images.map((img) => (
               <figure key={img.id}>
-                <img src={img.image} alt={img.caption} className="rounded-lg max-w-full" />
+                <img
+                  src={img.image}
+                  alt={img.caption}
+                  className="rounded-lg max-w-full cursor-pointer hover:opacity-80 transition"
+                  onClick={() => setLightboxSrc(img.image)}
+                />
                 {img.caption && (
                   <figcaption className="text-sm text-muted-foreground mt-1">{img.caption}</figcaption>
                 )}
@@ -135,7 +173,37 @@ export default function TopicDetailPage() {
         </div>
       </div>
 
-      {/* Prominent Quiz Navigation — only shown when quiz exists */}
+      {/* Prev/Next Navigation */}
+      <div className="flex justify-between mb-6">
+        {topic.prev_topic_id ? (
+          <button
+            onClick={() => navigate(`/student/topics/${topic.prev_topic_id}`)}
+            className="flex items-center gap-2 text-sm text-primary hover:underline"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Алдыңғы тақырып
+          </button>
+        ) : (
+          <div />
+        )}
+        {topic.next_topic_id ? (
+          <button
+            onClick={() => navigate(`/student/topics/${topic.next_topic_id}`)}
+            className="flex items-center gap-2 text-sm text-primary hover:underline"
+          >
+            Келесі тақырып
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      {/* Prominent Quiz Navigation */}
       {topic.has_quiz && (
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-center">
           <p className="text-blue-100 mb-3 text-sm">Сабақты оқып болдыңыз ба? Білімді тексеріңіз!</p>
@@ -149,6 +217,14 @@ export default function TopicDetailPage() {
             </svg>
           </Link>
         </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <ImageLightbox
+          src={lightboxSrc}
+          onClose={() => setLightboxSrc(null)}
+        />
       )}
     </div>
   );

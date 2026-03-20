@@ -190,9 +190,14 @@ export default function QuizPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Header with timer */}
+      {/* Header with timer and progress */}
       <div className="sticky top-0 bg-card shadow-sm rounded-lg p-4 mb-6 flex justify-between items-center z-10">
-        <h1 className="text-lg font-bold text-foreground">{quiz.title}</h1>
+        <div>
+          <h1 className="text-lg font-bold text-foreground">{quiz.title}</h1>
+          <p className="text-xs text-muted-foreground">
+            {Object.keys(answers).length} / {quiz.questions.length} сұрақ жауапталды
+          </p>
+        </div>
         <div className={`text-lg font-mono font-bold ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-primary'}`}>
           {formatTime(timeLeft)}
         </div>
@@ -240,8 +245,19 @@ export default function QuizPage() {
 
       {/* Submit */}
       <div className="mt-8 text-center pb-8">
+        {Object.keys(answers).length < quiz.questions.length && (
+          <p className="text-amber-600 text-sm mb-3">
+            {quiz.questions.length - Object.keys(answers).length} сұраққа жауап берілмеді
+          </p>
+        )}
         <button
-          onClick={handleSubmit}
+          onClick={() => {
+            const unanswered = quiz.questions.length - Object.keys(answers).length;
+            if (unanswered > 0) {
+              if (!confirm(`${unanswered} сұраққа жауап берілмеді. Жіберу керек пе?`)) return;
+            }
+            handleSubmit();
+          }}
           disabled={submitting}
           className="bg-primary text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
         >

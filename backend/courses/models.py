@@ -33,9 +33,17 @@ class Lesson(models.Model):
     topic = models.OneToOneField(Topic, on_delete=models.CASCADE, related_name='lesson')
     content = models.TextField()
     video_url = models.URLField(blank=True, null=True)
+    video_file = models.FileField(upload_to='lesson_videos/', blank=True, null=True)
 
     def __str__(self):
         return f"Lesson: {self.topic.title}"
+
+    def get_video_source(self):
+        if self.video_file:
+            return {'type': 'file', 'url': self.video_file.url}
+        elif self.video_url:
+            return {'type': 'youtube', 'url': self.video_url}
+        return None
 
 
 class LessonImage(models.Model):
@@ -54,6 +62,7 @@ class TopicProgress(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='progress')
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(blank=True, null=True)
+    opened_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         unique_together = ('student', 'topic')

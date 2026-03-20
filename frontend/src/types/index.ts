@@ -30,11 +30,18 @@ export interface LessonImage {
   caption: string;
 }
 
+export interface VideoSource {
+  type: 'youtube' | 'file';
+  url: string;
+}
+
 export interface Lesson {
   id: number;
   topic: number;
   content: string;
   video_url?: string;
+  video_file?: string;
+  video_source?: VideoSource | null;
   images?: LessonImage[];
 }
 

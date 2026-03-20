@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import viewsets, generics, status
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -42,6 +43,13 @@ class TopicViewSet(viewsets.GenericViewSet):
 
     def retrieve(self, request, pk=None):
         topic = self.get_object()
+        if request.user.role == 'student':
+            progress, _ = TopicProgress.objects.get_or_create(
+                student=request.user, topic=topic,
+            )
+            if not progress.opened_at:
+                progress.opened_at = timezone.now()
+                progress.save(update_fields=['opened_at'])
         serializer = self.get_serializer(topic)
         return Response(serializer.data)
 
@@ -97,6 +105,7 @@ class TeacherTopicViewSet(viewsets.ModelViewSet):
 class TeacherLessonViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     serializer_class = TeacherLessonSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         return Lesson.objects.all()

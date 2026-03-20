@@ -15,8 +15,14 @@ export const deleteTopic = (id: number) => api.delete(`/courses/teacher/topics/$
 
 // Lessons CRUD
 export const getTeacherLessons = () => api.get('/courses/teacher/lessons/');
-export const createLesson = (data: { topic: number; content: string; video_url?: string | null }) => api.post('/courses/teacher/lessons/', data);
-export const updateLesson = (id: number, data: { content: string; video_url?: string | null }) => api.patch(`/courses/teacher/lessons/${id}/`, data);
+export const createLesson = (data: FormData) =>
+  api.post('/courses/teacher/lessons/', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+export const updateLesson = (id: number, data: FormData) =>
+  api.patch(`/courses/teacher/lessons/${id}/`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 export const deleteLesson = (id: number) => api.delete(`/courses/teacher/lessons/${id}/`);
 
 // Quizzes CRUD
