@@ -20,6 +20,7 @@ from .serializers import (
 
 class SectionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         if self.request.user.role == 'teacher':
@@ -35,6 +36,7 @@ class SectionViewSet(viewsets.ReadOnlyModelViewSet):
 class TopicViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TopicDetailSerializer
+    pagination_class = None
 
     def get_queryset(self):
         if self.request.user.role == 'teacher':
@@ -70,6 +72,7 @@ class TopicViewSet(viewsets.GenericViewSet):
 
 class ProgressView(generics.GenericAPIView):
     permission_classes = [IsStudent]
+    pagination_class = None
 
     def get(self, request):
         sections = Section.objects.filter(is_published=True)
@@ -94,18 +97,21 @@ class TeacherSectionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     queryset = Section.objects.all()
     serializer_class = TeacherSectionSerializer
+    pagination_class = None
 
 
 class TeacherTopicViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     queryset = Topic.objects.all()
     serializer_class = TeacherTopicSerializer
+    pagination_class = None
 
 
 class TeacherLessonViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     serializer_class = TeacherLessonSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pagination_class = None
 
     def get_queryset(self):
         return Lesson.objects.all()
@@ -117,6 +123,7 @@ class TeacherLessonImageViewSet(viewsets.GenericViewSet,
     permission_classes = [IsTeacher]
     serializer_class = TeacherLessonImageSerializer
     queryset = LessonImage.objects.all()
+    pagination_class = None
 
     def create(self, request, *args, **kwargs):
         lesson_id = request.data.get('lesson')

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import ReactPlayer from 'react-player';
 import { getTopic, completeTopic } from '../../api/courses';
 import Breadcrumbs from '../../components/common/Breadcrumbs';
 import ImageLightbox from '../../components/common/ImageLightbox';
@@ -68,11 +69,6 @@ export default function TopicDetailPage() {
     }
   };
 
-  const getYouTubeId = (url: string) => {
-    const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&?/]+)/);
-    return match ? match[1] : null;
-  };
-
   if (loading) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
@@ -105,23 +101,13 @@ export default function TopicDetailPage() {
         </div>
 
         {/* Video */}
-        {videoSource?.type === 'youtube' && getYouTubeId(videoSource.url) && (
+        {videoSource?.url && (
           <div className="aspect-video mb-6 rounded-lg overflow-hidden bg-black">
-            <iframe
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${getYouTubeId(videoSource.url)}`}
-              title={topic.title}
-              allowFullScreen
-            />
-          </div>
-        )}
-        {videoSource?.type === 'file' && (
-          <div className="aspect-video mb-6 rounded-lg overflow-hidden bg-black">
-            <video
-              className="w-full h-full"
+            <ReactPlayer
               src={videoSource.url}
               controls
-              controlsList="nodownload"
+              width="100%"
+              height="100%"
             />
           </div>
         )}

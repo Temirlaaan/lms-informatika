@@ -72,3 +72,64 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ReactQuill Dark Mode */
+.dark .ql-toolbar.ql-snow {
+  border-color: var(--color-border);
+  background: var(--color-secondary);
+}
+
+.dark .ql-toolbar.ql-snow .ql-stroke {
+  stroke: var(--color-muted-foreground);
+}
+
+.dark .ql-toolbar.ql-snow .ql-fill {
+  fill: var(--color-muted-foreground);
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-label {
+  color: var(--color-muted-foreground);
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-options {
+  background: var(--color-card);
+  border-color: var(--color-border);
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-item:hover,
+.dark .ql-toolbar.ql-snow button:hover {
+  color: var(--color-foreground);
+}
+
+.dark .ql-toolbar.ql-snow button:hover .ql-stroke {
+  stroke: var(--color-foreground);
+}
+
+.dark .ql-toolbar.ql-snow button:hover .ql-fill {
+  fill: var(--color-foreground);
+}
+
+.dark .ql-container.ql-snow {
+  border-color: var(--color-border);
+}
+
+.dark .ql-editor {
+  color: var(--color-foreground);
+  background: var(--color-card);
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: var(--color-muted-foreground);
+}
+
+.dark .ql-snow .ql-tooltip {
+  background: var(--color-card);
+  border-color: var(--color-border);
+  color: var(--color-foreground);
+}
+
+.dark .ql-snow .ql-tooltip input[type="text"] {
+  background: var(--color-secondary);
+  border-color: var(--color-border);
+  color: var(--color-foreground);
+}

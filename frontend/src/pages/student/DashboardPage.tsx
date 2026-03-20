@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import { getProgress } from '../../api/courses';
 import { getMyGrades } from '../../api/grades';
@@ -120,15 +121,31 @@ export default function StudentDashboard() {
               <div key={g.id} className="text-center p-3 rounded-lg bg-secondary">
                 <p className="text-xs text-muted-foreground truncate">{g.section_title}</p>
                 <p className={`text-2xl font-bold mt-1 ${
-                  g.grade_value === 5 ? 'text-green-600' :
-                  g.grade_value === 4 ? 'text-blue-600' :
-                  g.grade_value === 3 ? 'text-yellow-600' : 'text-red-600'
+                  g.grade_value === 5 ? 'text-green-700 dark:text-green-400' :
+                  g.grade_value === 4 ? 'text-blue-700 dark:text-blue-400' :
+                  g.grade_value === 3 ? 'text-yellow-700 dark:text-yellow-400' : 'text-red-700 dark:text-red-400'
                 }`}>
                   {g.grade_value}
                 </p>
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Grades chart */}
+      {grades.length > 0 && (
+        <div className="bg-card rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Бөлімдер бойынша балл</h2>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={grades.map(g => ({ name: g.section_title, score: g.score }))}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="name" tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12 }} />
+              <YAxis tick={{ fill: 'var(--color-muted-foreground)' }} domain={[0, 100]} />
+              <Tooltip contentStyle={{ background: 'var(--color-card)', border: '1px solid var(--color-border)', color: 'var(--color-foreground)' }} />
+              <Bar dataKey="score" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Балл %" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>

@@ -69,8 +69,17 @@ export default function TeacherLayout() {
               <h2 className="text-lg font-bold text-primary hidden lg:block">LMS Информатика</h2>
               <p className="text-xs text-accent font-medium hidden lg:block">Мұғалім панелі</p>
               <div className="mt-3">
-                <Link to="/teacher/profile" className="hover:text-primary transition" onClick={() => setSidebarOpen(false)}>
-                  <p className="font-medium text-card-foreground">{user?.full_name || user?.username}</p>
+                <Link to="/teacher/profile" className="flex items-center gap-3 hover:text-primary transition" onClick={() => setSidebarOpen(false)}>
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user?.full_name || user?.username || 'Аватар'} className="w-9 h-9 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                      {(user?.full_name || user?.username || '?').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-card-foreground">{user?.full_name || user?.username}</p>
+                  </div>
                 </Link>
               </div>
             </div>

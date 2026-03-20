@@ -23,6 +23,7 @@ from .serializers import (
 class QuizViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Quiz.objects.all()
+    pagination_class = None
 
     @action(detail=False, url_path='topic/(?P<topic_id>[^/.]+)')
     def by_topic(self, request, topic_id=None):
@@ -172,6 +173,7 @@ class QuizViewSet(viewsets.GenericViewSet):
 
 class AttemptViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsStudent]
+    pagination_class = None
 
     def get_queryset(self):
         return QuizAttempt.objects.filter(student=self.request.user)
@@ -186,15 +188,18 @@ class TeacherQuizViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     queryset = Quiz.objects.all()
     serializer_class = TeacherQuizSerializer
+    pagination_class = None
 
 
 class TeacherQuestionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     queryset = Question.objects.all()
     serializer_class = TeacherQuestionSerializer
+    pagination_class = None
 
 
 class TeacherChoiceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
     queryset = Choice.objects.all()
     serializer_class = TeacherChoiceSerializer
+    pagination_class = None

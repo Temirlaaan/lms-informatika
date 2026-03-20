@@ -15,6 +15,7 @@ class MyGradesView(generics.GenericAPIView):
     """GET /api/grades/my/ — student's own grades."""
 
     permission_classes = [IsStudent]
+    pagination_class = None
 
     def get(self, request):
         grades = Grade.objects.filter(student=request.user).select_related('section')
@@ -26,6 +27,7 @@ class TeacherGradebookView(generics.GenericAPIView):
     """GET /api/grades/journal/ — all students x all sections."""
 
     permission_classes = [IsTeacher]
+    pagination_class = None
 
     def get(self, request):
         students = User.objects.filter(role='student').order_by('full_name')
@@ -55,6 +57,7 @@ class StudentDetailGradesView(generics.GenericAPIView):
     """GET /api/grades/student/<id>/ — specific student's grades (teacher)."""
 
     permission_classes = [IsTeacher]
+    pagination_class = None
 
     def get(self, request, student_id):
         student = User.objects.filter(id=student_id, role='student').first()
@@ -82,6 +85,7 @@ class StatisticsView(generics.GenericAPIView):
     """GET /api/grades/statistics/ — class-wide stats."""
 
     permission_classes = [IsTeacher]
+    pagination_class = None
 
     def get(self, request):
         from quizzes.models import Quiz

@@ -19,6 +19,7 @@ class RegisterView(generics.CreateAPIView):
 
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+    pagination_class = None
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -51,6 +52,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_object(self):
         return self.request.user
@@ -60,3 +62,4 @@ class StudentListView(generics.ListAPIView):
     permission_classes = [IsTeacher]
     serializer_class = UserSerializer
     queryset = User.objects.filter(role='student').order_by('full_name')
+    pagination_class = None
