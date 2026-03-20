@@ -11,9 +11,7 @@ export const getProfile = () =>
   api.get('/auth/profile/');
 
 export const updateProfile = (data: FormData) =>
-  api.put('/auth/profile/', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  api.patch('/auth/profile/', data);
 
 export const refreshToken = (refresh: string) =>
   api.post('/auth/token/refresh/', { refresh });

@@ -11,6 +11,7 @@ import {
   deleteTopic,
   getTeacherLessons,
 } from '../../api/teacher';
+import { useToast } from '../../components/common/Toast';
 import SectionForm from '../../components/teacher/SectionForm';
 import TopicForm from '../../components/teacher/TopicForm';
 import LessonEditor from '../../components/teacher/LessonEditor';
@@ -23,6 +24,7 @@ export default function ContentManagerPage() {
   const [error, setError] = useState('');
 
   // UI state
+  const { showToast } = useToast();
   const [showSectionForm, setShowSectionForm] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
@@ -63,7 +65,7 @@ export default function ContentManagerPage() {
       setEditingSection(null);
       await fetchAll();
     } catch {
-      alert('Бөлімді сақтау кезінде қате орын алды');
+      showToast('Бөлімді сақтау кезінде қате орын алды', 'error');
     }
   };
 
@@ -73,7 +75,7 @@ export default function ContentManagerPage() {
       await deleteSection(id);
       await fetchAll();
     } catch {
-      alert('Бөлімді жою кезінде қате орын алды');
+      showToast('Бөлімді жою кезінде қате орын алды', 'error');
     }
   };
 
@@ -89,7 +91,7 @@ export default function ContentManagerPage() {
       setEditingTopic(null);
       await fetchAll();
     } catch {
-      alert('Тақырыпты сақтау кезінде қате орын алды');
+      showToast('Тақырыпты сақтау кезінде қате орын алды', 'error');
     }
   };
 
@@ -99,7 +101,7 @@ export default function ContentManagerPage() {
       await deleteTopic(id);
       await fetchAll();
     } catch {
-      alert('Тақырыпты жою кезінде қате орын алды');
+      showToast('Тақырыпты жою кезінде қате орын алды', 'error');
     }
   };
 

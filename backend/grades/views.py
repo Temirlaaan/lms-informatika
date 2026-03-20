@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Avg
+from django.db.models import Avg, Count, Q
 from rest_framework import generics
 from rest_framework.response import Response
 
@@ -34,18 +34,24 @@ class TeacherGradebookView(generics.GenericAPIView):
         sections = Section.objects.filter(is_published=True).order_by('order')
 
         section_names = [s.title for s in sections]
-        student_list = []
-        for student in students:
-            grades = Grade.objects.filter(student=student).select_related('section')
-            grade_map = {
-                g.section.title: {'score': g.score, 'grade_value': g.grade_value}
-                for g in grades
+
+        all_grades = Grade.objects.filter(
+            student__role='student'
+        ).select_related('section', 'student')
+        grades_by_student: dict[int, dict[str, dict]] = {}
+        for g in all_grades:
+            grades_by_student.setdefault(g.student_id, {})[g.section.title] = {
+                'score': g.score, 'grade_value': g.grade_value,
             }
-            student_list.append({
+
+        student_list = [
+            {
                 'student_id': student.id,
                 'student_name': student.full_name or student.username,
-                'grades': grade_map,
-            })
+                'grades': grades_by_student.get(student.id, {}),
+            }
+            for student in students
+        ]
 
         return Response({
             'sections': section_names,
@@ -90,26 +96,30 @@ class StatisticsView(generics.GenericAPIView):
     def get(self, request):
         from quizzes.models import Quiz
 
-        sections = Section.objects.filter(is_published=True).order_by('order')
         total_students = User.objects.filter(role='student').count()
-        total_sections = sections.count()
         total_quizzes = Quiz.objects.count()
 
-        section_stats = []
-        all_scores = []
-        for section in sections:
-            grades = Grade.objects.filter(section=section)
-            avg_score = grades.aggregate(avg=Avg('score'))['avg'] or 0
-            students_with_grade = grades.values('student').distinct().count()
-            all_scores.extend(grades.values_list('score', flat=True))
+        sections = Section.objects.filter(is_published=True).order_by('order').annotate(
+            avg_score=Avg('grades__score'),
+            students_completed=Count('grades__student', distinct=True),
+        )
+        total_sections = sections.count()
 
+        section_stats = []
+        all_scores = list(Grade.objects.filter(
+            section__is_published=True
+        ).values_list('score', flat=True))
+
+        for section in sections:
+            avg = section.avg_score or 0
+            completed = section.students_completed or 0
             section_stats.append({
                 'section_name': section.title,
-                'avg_score': round(avg_score, 1),
-                'students_completed': students_with_grade,
+                'avg_score': round(avg, 1),
+                'students_completed': completed,
                 'total_students': total_students,
                 'completion_rate': round(
-                    (students_with_grade / total_students * 100) if total_students > 0 else 0, 1
+                    (completed / total_students * 100) if total_students > 0 else 0, 1
                 ),
             })
 

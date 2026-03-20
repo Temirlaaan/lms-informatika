@@ -102,7 +102,7 @@ class TeacherSectionViewSet(viewsets.ModelViewSet):
 
 class TeacherTopicViewSet(viewsets.ModelViewSet):
     permission_classes = [IsTeacher]
-    queryset = Topic.objects.all()
+    queryset = Topic.objects.select_related('section').all()
     serializer_class = TeacherTopicSerializer
     pagination_class = None
 

@@ -216,7 +216,10 @@ class TeacherLessonSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if validated_data.get('video_url') and instance.video_file:
-            instance.video_file.delete(save=False)
+            try:
+                instance.video_file.delete(save=False)
+            except Exception:
+                pass
             validated_data['video_file'] = None
         if validated_data.get('video_file') and instance.video_url:
             validated_data['video_url'] = None

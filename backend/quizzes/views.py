@@ -176,7 +176,7 @@ class AttemptViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        return QuizAttempt.objects.filter(student=self.request.user)
+        return QuizAttempt.objects.filter(student=self.request.user).select_related('quiz')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

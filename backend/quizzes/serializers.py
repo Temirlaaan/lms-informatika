@@ -93,6 +93,9 @@ class TeacherChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Choice
         fields = ['id', 'question', 'text', 'is_correct', 'order']
+        extra_kwargs = {
+            'question': {'required': False},
+        }
 
 
 class TeacherQuestionSerializer(serializers.ModelSerializer):
@@ -101,6 +104,9 @@ class TeacherQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ['id', 'quiz', 'text', 'question_type', 'image', 'points', 'order', 'choices']
+        extra_kwargs = {
+            'quiz': {'required': False},
+        }
 
 
 class TeacherQuizSerializer(serializers.ModelSerializer):

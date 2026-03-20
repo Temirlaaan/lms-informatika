@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarCacheBust, setAvatarCacheBust] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function ProfilePage() {
       await refreshUser();
       setAvatarFile(null);
       setAvatarPreview(null);
+      setAvatarCacheBust(Date.now());
       if (fileInputRef.current) fileInputRef.current.value = '';
       showToast('Профиль сәтті сақталды', 'success');
     } catch {
@@ -58,7 +60,8 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const initials = (user.full_name || user.username).slice(0, 2).toUpperCase();
-  const displayAvatar = avatarPreview || user.avatar;
+  const avatarUrl = user.avatar ? `${user.avatar}${avatarCacheBust ? `?t=${avatarCacheBust}` : ''}` : null;
+  const displayAvatar = avatarPreview || avatarUrl;
 
   return (
     <div className="max-w-lg">

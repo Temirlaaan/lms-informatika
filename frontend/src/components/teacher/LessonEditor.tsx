@@ -9,6 +9,7 @@ import {
   uploadLessonImage,
   deleteLessonImage,
 } from '../../api/teacher';
+import { useToast } from '../common/Toast';
 
 /**
  * Convert any YouTube URL to embed format.
@@ -48,6 +49,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
   );
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [existingVideoSource, setExistingVideoSource] = useState<VideoSource | null>(lesson?.video_source ?? null);
+  const { showToast } = useToast();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<LessonImage[]>(lesson?.images ?? []);
@@ -64,7 +66,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
 
   const imageHandler = useCallback(() => {
     if (!lesson) {
-      alert('Алдымен сабақты сақтаңыз, содан кейін суреттерді қоса аласыз');
+      showToast('Алдымен сабақты сақтаңыз, содан кейін суреттерді қоса аласыз', 'error');
       return;
     }
     const input = document.createElement('input');
@@ -75,7 +77,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
       const file = input.files?.[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) {
-        alert('Файл өте үлкен (макс. 5МБ)');
+        showToast('Файл өте үлкен (макс. 5МБ)', 'error');
         return;
       }
       const formData = new FormData();
@@ -85,7 +87,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
         const res = await uploadLessonImage(formData);
         const url: string | undefined = res.data.image_url || res.data.image;
         if (!url || (!url.startsWith('/media/') && !url.startsWith('http'))) {
-          alert('Серверден қате жауап келді');
+          showToast('Серверден қате жауап келді', 'error');
           return;
         }
         const editor = quillRef.current?.getEditor();
@@ -94,10 +96,10 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
           editor.insertEmbed(range.index, 'image', url);
         }
       } catch {
-        alert('Суретті жүктеу кезінде қате орын алды');
+        showToast('Суретті жүктеу кезінде қате орын алды', 'error');
       }
     };
-  }, [lesson]);
+  }, [lesson, showToast]);
 
   const quillModules = useMemo(() => ({
     toolbar: {
@@ -118,7 +120,6 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
         const trimmedUrl = videoUrl.trim();
         const processedUrl = trimmedUrl ? (toYouTubeEmbedUrl(trimmedUrl) || trimmedUrl) : '';
         formData.append('video_url', processedUrl);
-        formData.append('video_file', '');
       } else {
         formData.append('video_url', '');
         if (videoFile) {
@@ -134,7 +135,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
       }
       onSaved();
     } catch {
-      alert('Сабақты сақтау кезінде қате орын алды');
+      showToast('Сабақты сақтау кезінде қате орын алды', 'error');
     } finally {
       setSaving(false);
     }
@@ -147,20 +148,20 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
       await deleteLesson(lesson.id);
       onSaved();
     } catch {
-      alert('Сабақты жою кезінде қате орын алды');
+      showToast('Сабақты жою кезінде қате орын алды', 'error');
     }
   };
 
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     if (!lesson) {
-      alert('Алдымен сабақты сақтаңыз');
+      showToast('Алдымен сабақты сақтаңыз', 'error');
       return;
     }
     const maxSize = 5 * 1024 * 1024;
     for (const file of Array.from(files)) {
       if (file.size > maxSize) {
-        alert(`Файл өте үлкен: ${file.name} (макс. 5МБ)`);
+        showToast(`Файл өте үлкен: ${file.name} (макс. 5МБ)`, 'error');
         return;
       }
     }
@@ -174,7 +175,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
       }
       onSaved();
     } catch {
-      alert('Суретті жүктеу кезінде қате орын алды');
+      showToast('Суретті жүктеу кезінде қате орын алды', 'error');
     } finally {
       setUploading(false);
     }
@@ -186,7 +187,7 @@ export default function LessonEditor({ topicId, lesson, onSaved }: LessonEditorP
       await deleteLessonImage(imageId);
       setImages((prev) => prev.filter((img) => img.id !== imageId));
     } catch {
-      alert('Суретті жою кезінде қате орын алды');
+      showToast('Суретті жою кезінде қате орын алды', 'error');
     }
   };
 

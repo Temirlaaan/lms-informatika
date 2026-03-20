@@ -14,6 +14,7 @@ import {
   updateChoice,
   deleteChoice,
 } from '../../api/teacher';
+import { useToast } from '../../components/common/Toast';
 
 /* ─── Choice Editor ─── */
 function ChoiceRow({
@@ -72,9 +73,11 @@ function ChoiceRow({
 function QuestionEditor({
   question,
   onRefresh,
+  onError,
 }: {
   question: Question;
   onRefresh: () => void;
+  onError: (msg: string) => void;
 }) {
   const [text, setText] = useState(question.text);
   const [qType, setQType] = useState(question.question_type);
@@ -87,7 +90,7 @@ function QuestionEditor({
       setEditing(false);
       onRefresh();
     } catch {
-      alert('Сұрақты сақтау кезінде қате орын алды');
+      onError('Сұрақты сақтау кезінде қате орын алды');
     }
   };
 
@@ -97,7 +100,7 @@ function QuestionEditor({
       await deleteQuestion(question.id);
       onRefresh();
     } catch {
-      alert('Сұрақты жою кезінде қате орын алды');
+      onError('Сұрақты жою кезінде қате орын алды');
     }
   };
 
@@ -111,7 +114,7 @@ function QuestionEditor({
       });
       onRefresh();
     } catch {
-      alert('Жауап нұсқасын қосу кезінде қате орын алды');
+      onError('Жауап нұсқасын қосу кезінде қате орын алды');
     }
   };
 
@@ -120,7 +123,7 @@ function QuestionEditor({
       await updateChoice(choiceId, data);
       onRefresh();
     } catch {
-      alert('Жауапты жаңарту кезінде қате орын алды');
+      onError('Жауапты жаңарту кезінде қате орын алды');
     }
   };
 
@@ -129,7 +132,7 @@ function QuestionEditor({
       await deleteChoice(choiceId);
       onRefresh();
     } catch {
-      alert('Жауапты жою кезінде қате орын алды');
+      onError('Жауапты жою кезінде қате орын алды');
     }
   };
 
@@ -345,6 +348,7 @@ export default function QuizManagerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const { showToast } = useToast();
   const [showQuizForm, setShowQuizForm] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
   const [expandedQuiz, setExpandedQuiz] = useState<number | null>(null);
@@ -391,7 +395,7 @@ export default function QuizManagerPage() {
       setEditingQuiz(null);
       await fetchAll();
     } catch {
-      alert('Тестті сақтау кезінде қате орын алды');
+      showToast('Тестті сақтау кезінде қате орын алды', 'error');
     }
   };
 
@@ -401,7 +405,7 @@ export default function QuizManagerPage() {
       await deleteQuiz(id);
       await fetchAll();
     } catch {
-      alert('Тестті жою кезінде қате орын алды');
+      showToast('Тестті жою кезінде қате орын алды', 'error');
     }
   };
 
@@ -416,7 +420,7 @@ export default function QuizManagerPage() {
       });
       await fetchAll();
     } catch {
-      alert('Сұрақ қосу кезінде қате орын алды');
+      showToast('Сұрақ қосу кезінде қате орын алды', 'error');
     }
   };
 
@@ -530,7 +534,7 @@ export default function QuizManagerPage() {
                               {quizQuestions[quiz.id]
                                 .sort((a, b) => a.order - b.order)
                                 .map((q) => (
-                                  <QuestionEditor key={q.id} question={q} onRefresh={fetchAll} />
+                                  <QuestionEditor key={q.id} question={q} onRefresh={fetchAll} onError={(msg) => showToast(msg, 'error')} />
                                 ))}
                             </div>
                           ) : (
